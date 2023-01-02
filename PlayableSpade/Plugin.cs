@@ -26,6 +26,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPStage));
             harmony.PatchAll(typeof(PatchMenuFile));
             harmony.PatchAll(typeof(PatchFPEventSequence));
+            harmony.PatchAll(typeof(PatchParentActivator));
         }
     }
 }
