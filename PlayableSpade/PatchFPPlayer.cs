@@ -271,7 +271,7 @@ namespace PlayableSpade
 
         public static void Action_Spade_AirMoves()
         {
-            if ((player.input.attackPress || (player.input.attackHold && !player.input.up && !player.input.down)) && !(player.state == State_ThrowCards)) //Base Card Throw
+            if ((player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards))) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);                
@@ -284,7 +284,7 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
+            else if (player.guardTime <= 0f && (player.input.guardHold || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
@@ -593,6 +593,35 @@ namespace PlayableSpade
             for (var i = 1; i < codes.Count; i++)
             {
                 if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_3)
+                {
+                    Label[] targets = (Label[])codes[i].operand;
+                    targets = targets.AddItem(airStart).ToArray();
+                    codes[i].operand = targets;
+                    airEnd = (Label)codes[i + 1].operand;
+                }
+
+            }
+            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
+            airCodeStart.labels.Add(airStart);
+
+            codes.Add(airCodeStart);
+            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
+            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
+
+            return codes;
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(FPPlayer), "State_Swimming", MethodType.Normal)]
+        static IEnumerable<CodeInstruction> PlayerSwimTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            Label airStart = il.DefineLabel();
+            Label airEnd = il.DefineLabel();
+
+            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+            for (var i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(airStart).ToArray();
