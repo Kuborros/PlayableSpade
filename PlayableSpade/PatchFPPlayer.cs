@@ -18,7 +18,6 @@ namespace PlayableSpade
         public static AudioClip sfxThrowDualCard;
         public static AudioClip sfxRolling;
         public static FPPlayer player;
-        public static float guardBuffer;
 
         static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
         static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
@@ -28,55 +27,12 @@ namespace PlayableSpade
         protected static float crashTimer;
         protected static float speedMultiplier;
         protected static bool upDash;
-
-        public static readonly float SINGLE_SpadeBlinkDash_Velocity = 32f;
-        protected static readonly int SINGLE_Spade_CardAmount_BasicThrow = 4;
-        protected static readonly int SINGLE_Spade_CardAmount_DoubleThrow = 4;
-        protected static readonly float SINGLE_Spade_EnergyRecoverRateMultiplier_LowPenaltyThreshold = 1f;
-        protected static readonly float SINGLE_Spade_EnergyRecoverRateMultiplier_HighPenaltyThreshold = 0.7f;
-        protected static readonly float SINGLE_Spade_EnergyRecoverPenaltyScore_LowThreshold = 6f;
-        protected static readonly float SINGLE_Spade_EnergyRecoverPenaltyScore_HighThreshold = 40f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_NominalValue = 8f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_IncreasedBoostThreshold = 0f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_IncreasedBoostMultiplier = 0.5f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_BoostDecayStart = 10f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_BoostDecayMax = 16f;
-        protected static readonly float SINGLE_SpadeAirPounce_VelocityXBoost_BoostDecayMultiplier = 0.5f;
-        protected static readonly float SINGLE_SpadeAirDownAttack_VelocityXBoost_NominalValue = 4f;
-        protected static readonly float SINGLE_SpadeAirDownAttack_VelocityXBoost_IncreasedBoostThreshold = 4f;
-        protected static readonly float SINGLE_SpadeAirDownAttack_VelocityXBoost_IncreasedBoostMultiplier = 1.5f;
-        protected static readonly float SINGLE_SpadeAirDownAttack_VelocityXBoost_MaxBoostThreshold = 16f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_InitialValue = 7f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_DecayInitialValue = 3.5f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_DecayDecrement = 1.5f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_DecayFinalValue = 1.5f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_FinalValue = 0f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_MaxBoostThreshold = 9f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_IncreasedBoostThreshold = 0f;
-        protected static readonly float SINGLE_SpadeUpAttack_VelocityYBoost_IncreasedBoostMultiplier = 2f;
-        
+        protected static bool autoGuard;
 
         public static void Action_ResetCardAngle()
         {
             cardAngle = 0;
         }
-
-        private static void AttackStats_Spade_Blink()
-        {
-            FPPlayer player = FPStage.player[0];
-            player.attackPower = 8f;
-            player.attackHitstun = 0f;
-            player.attackEnemyInvTime = 10f;
-            player.attackKnockback.x = Mathf.Max(Mathf.Abs(player.prevVelocity.x * 0.375f), 4.5f);
-            if (player.direction == FPDirection.FACING_LEFT)
-            {
-                player.attackKnockback.x = -player.attackKnockback.x;
-            }
-            player.attackKnockback.y = player.prevVelocity.y * 0.5f;
-            player.attackSfx = 5;
-            player.attackPower *= player.GetAttackModifier();
-        }
-
         private static void State_ThrowCards()
         {
             if (cardTimer > 10)
@@ -111,7 +67,10 @@ namespace PlayableSpade
                     player.state = new FPObjectState(player.State_InAir);
                 }
             }
-            if (!player.onGround)ApplyGravityForce();
+            if (!player.onGround) 
+            { 
+                ApplyGravityForce();
+            }
         }
 
         private static void State_DualCrash()
@@ -146,8 +105,50 @@ namespace PlayableSpade
             }
         }
 
+        private static void State_Spade_AirDash()
+        {
+            player.SetPlayerAnimation("AirDash", 0f, 0f, false, true);
+            player.genericTimer += FPStage.deltaTime;
+            player.superArmor = true;
+            if (player.genericTimer >= 5f || player.colliderWall != null)
+            {
+                player.genericTimer = 0f;
+                if (player.onGround)
+                {
+                    player.state = new FPObjectState(player.State_Ground);
+                }
+                else
+                {
+                    player.state = new FPObjectState(player.State_InAir);
+                }
+                return;
+            }
+        }
+
         private static void Action_SpadeThrowCard()
         {
+            if (player.direction == FPDirection.FACING_LEFT)
+            {
+                if (player.input.up)
+                {
+                    cardAngle -= 30;
+                }
+                if (player.input.down && !player.onGround)
+                {
+                    cardAngle += 30;
+                }
+            }
+            else
+            {
+                if (player.input.up)
+                {
+                    cardAngle += 30;
+                }
+                if (player.input.down && !player.onGround)
+                {
+                    cardAngle -= 30;
+                }
+            }
             for (int i = 1; i <= 3; i++)
             {
                 float num = 10f;
@@ -175,7 +176,8 @@ namespace PlayableSpade
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
-                projectileBasic.angle = num2;              
+                projectileBasic.angle = num2;
+                projectileBasic.ignoreTerrain = false;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.sfxExplode = null;
                 projectileBasic.parentObject = player;
@@ -236,36 +238,37 @@ namespace PlayableSpade
 
         public static void Action_Spade_Dash(float dashSpeed)
         {
-            if (dashSpeed == 0f)
+            if (upDash)
             {
-                player.groundVel *= 0.5f;
-                player.velocity.x = player.velocity.x * 0.5f;
-            }
-            else if ((player.input.up || player.input.upPress) && upDash)
-            {
-                player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
-                upDash = false;
-            }
-            else if (player.direction == FPDirection.FACING_RIGHT)
-            {
-                if (player.onGround)
+                if (player.input.up || player.input.upPress)
                 {
-                    player.groundVel = Mathf.Max(Mathf.Min(player.groundVel + dashSpeed, 18f), player.groundVel);
+                    player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
+                    upDash = false;
+                    player.state = new FPObjectState(State_Spade_AirDash);
                 }
-                else if (upDash)
+                else if (player.direction == FPDirection.FACING_RIGHT)
                 {
-                    player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
-                    upDash= false;
+                    if (player.onGround)
+                    {
+                        player.groundVel = Mathf.Max(Mathf.Min(player.groundVel + dashSpeed, 18f), player.groundVel);
+                    }
+                    else
+                    {
+                        player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
+                        upDash = false;
+                        player.state = new FPObjectState(State_Spade_AirDash);
+                    }
                 }
-            }
-            else if (player.onGround)
-            {
-                player.groundVel = Mathf.Min(Mathf.Max(player.groundVel - dashSpeed, -18f), player.groundVel);
-            }
-            else if (upDash)
-            {
-                player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
-                upDash = false;
+                else if (player.onGround)
+                {
+                    player.groundVel = Mathf.Min(Mathf.Max(player.groundVel - dashSpeed, -18f), player.groundVel);
+                }
+                else
+                {
+                    player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
+                    upDash = false;
+                    player.state = new FPObjectState(State_Spade_AirDash);
+                }
             }
         }
 
@@ -284,15 +287,15 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardHold || (guardBuffer > 0f && player.input.guardHold)))
+            else if (player.guardTime <= 0f && (player.input.guardHold || player.input.guardHold))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
                 GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                 guardFlash.parentObject = player;
-                player.guardTime = 25f;
-                if (player.energy > 25)
+                player.guardTime = 50f;
+                if (player.energy > 25 && !autoGuard)
                 {
                     Action_Spade_Dash(45f);
                     player.energy -= 25;
@@ -303,21 +306,20 @@ namespace PlayableSpade
         public static void Action_Spade_GroundMoves()
         {
             upDash = true;
-
-            if ((player.input.attackPress || (player.input.attackHold && !player.input.up && !player.input.down)) && !(player.state == State_ThrowCards)) //Base Card Throw
+            if ((player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards))) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
             }
-            if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
+            if (player.guardTime <= 0f && (player.input.guardPress || player.input.guardHold))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
                 GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                 guardFlash.parentObject = player;
-                player.guardTime = 25f;
-                if (player.energy > 25)
+                player.guardTime = 50f;
+                if (player.energy > 25 && !autoGuard)
                 {
                     Action_Spade_Dash(90f);
                     player.energy -= 25;
@@ -387,6 +389,7 @@ namespace PlayableSpade
             player = __instance;
             speedMultiplier = ___speedMultiplier;
             if (player.onGround) upDash = true;
+            if (player.guardTime <= 0f) autoGuard = false;
         }
 
 
@@ -426,6 +429,16 @@ namespace PlayableSpade
             }
             player = __instance;
             upDash = true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(FPPlayer), "Action_Hurt", MethodType.Normal)]
+        static void PatchPlayerHurt(FPPlayer __instance)
+        {
+            if (FPSaveManager.assistGuard == 1 && !__instance.IsPowerupActive(FPPowerup.NO_GUARDING) && __instance.guardTime <= 0f && (__instance.state == new FPObjectState(__instance.State_Ground) || __instance.state == new FPObjectState(__instance.State_InAir) || __instance.state == new FPObjectState(__instance.State_LookUp) || __instance.state == new FPObjectState(__instance.State_Crouching) || __instance.state == new FPObjectState(__instance.State_Swimming)))
+            {
+                autoGuard = true;
+            }
         }
 
         [HarmonyTranspiler]
@@ -477,6 +490,37 @@ namespace PlayableSpade
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(FPPlayer), "State_Crouching", MethodType.Normal)]
         static IEnumerable<CodeInstruction> PlayerCrouchTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            Label groundStart = il.DefineLabel();
+            Label groundEnd = il.DefineLabel();
+
+            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+            for (var i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
+                {
+                    Label[] targets = (Label[])codes[i].operand;
+                    targets = targets.AddItem(groundStart).ToArray();
+                    codes[i].operand = targets;
+                    groundEnd = (Label)codes[i + 1].operand;
+                    break;
+                }
+            }
+
+            CodeInstruction groundCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
+            groundCodeStart.labels.Add(groundStart);
+
+            codes.Add(groundCodeStart);
+            codes.Add(new CodeInstruction(OpCodes.Call, m_GroundMoves));
+            codes.Add(new CodeInstruction(OpCodes.Br, groundEnd));
+
+
+            return codes;
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(FPPlayer), "State_LookUp", MethodType.Normal)]
+        static IEnumerable<CodeInstruction> PlayerLookUpTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             Label groundStart = il.DefineLabel();
             Label groundEnd = il.DefineLabel();
@@ -593,6 +637,35 @@ namespace PlayableSpade
             for (var i = 1; i < codes.Count; i++)
             {
                 if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_3)
+                {
+                    Label[] targets = (Label[])codes[i].operand;
+                    targets = targets.AddItem(airStart).ToArray();
+                    codes[i].operand = targets;
+                    airEnd = (Label)codes[i + 1].operand;
+                }
+
+            }
+            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
+            airCodeStart.labels.Add(airStart);
+
+            codes.Add(airCodeStart);
+            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
+            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
+
+            return codes;
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(FPPlayer), "State_LadderClimb", MethodType.Normal)]
+        static IEnumerable<CodeInstruction> PlayerLadderTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            Label airStart = il.DefineLabel();
+            Label airEnd = il.DefineLabel();
+
+            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+            for (var i = 1; i < codes.Count; i++)
+            {
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(airStart).ToArray();
