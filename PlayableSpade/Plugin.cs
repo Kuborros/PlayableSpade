@@ -30,6 +30,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPBreakable));
             harmony.PatchAll(typeof(PatchMenuCharacterSelect));
             harmony.PatchAll(typeof(PatchMenuPhoto));
+            harmony.PatchAll(typeof(PatchBFFCombiner));
         }
     }
 }

@@ -17,9 +17,10 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(MenuCharacterSelect), "Start", MethodType.Normal)]
         static void PatchCharacterSelectStart(MenuCharacterSelect __instance ,ref MenuCharacterWheel[] ___characterSprites, ref Sprite[] ___nameLabelSprites, ref MenuText[] ___infoText)
         {
-            spadeSelector = Plugin.moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade");
+            spadeSelector = GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade"));
             MenuCharacterWheel spadeWheel = spadeSelector.GetComponent<MenuCharacterWheel>();
             spadeWheel.parentObject = __instance;
+            spadeWheel.gameObject.transform.parent = __instance.transform;  
             ___characterSprites = ___characterSprites.AddToArray(spadeWheel);
 
             ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("names_4"));
