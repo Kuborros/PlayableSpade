@@ -14,6 +14,7 @@ namespace PlayableSpade
         static void PatchCollision(FPBreakable __instance)
         {
             List<FPPlayer> players = FPStage.FindFPPlayers(false);
+            if (__instance == null || players.Count == 0) return;
             foreach (FPPlayer fpplayer in players)
             {
                 if (FPCollision.CheckOOBB(__instance, __instance.hbSolid, fpplayer, fpplayer.hbTouch, false, false, false) && (fpplayer.state == new FPObjectState(fpplayer.State_Lilac_DragonBoostPt2) || (fpplayer.currentAnimation == "Rolling" && fpplayer.state != new FPObjectState(fpplayer.State_Carol_Roll))))
