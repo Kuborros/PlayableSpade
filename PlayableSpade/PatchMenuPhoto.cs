@@ -13,9 +13,7 @@ namespace PlayableSpade
         static void PatchMenuPhotoStart(ref MenuPhotoPose[] ___poseList)
         {
             MenuPhotoPose spadePoses = new MenuPhotoPose();
-
-
-            ___poseList = ___poseList.AddToArray(spadePoses);
+         ___poseList = ___poseList.AddToArray(spadePoses);
         }
     }
 }

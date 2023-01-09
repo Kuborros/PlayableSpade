@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
@@ -31,6 +31,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchMenuCharacterSelect));
             harmony.PatchAll(typeof(PatchMenuPhoto));
             harmony.PatchAll(typeof(PatchBFFCombiner));
+            harmony.PatchAll(typeof(PatchFPHudDigit));
         }
     }
 }
