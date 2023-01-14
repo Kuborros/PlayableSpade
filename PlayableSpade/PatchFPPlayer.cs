@@ -191,6 +191,7 @@ namespace PlayableSpade
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.terminalVelocity = 0f;
+                projectileBasic.gravityStrength = 0;
                 projectileBasic.sfxExplode = null;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
@@ -228,6 +229,7 @@ namespace PlayableSpade
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.sfxExplode = null;
+                projectileBasic.gravityStrength = 0;
                 projectileBasic.terminalVelocity = 0f;
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.parentObject = player;
