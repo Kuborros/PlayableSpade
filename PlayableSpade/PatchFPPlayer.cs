@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -16,7 +17,6 @@ namespace PlayableSpade
         public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
-        public static AudioClip sfxRolling;
         public static FPPlayer player;
 
         static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
@@ -28,6 +28,7 @@ namespace PlayableSpade
         protected static float speedMultiplier;
         protected static bool upDash;
         protected static bool autoGuard;
+        protected static float ghostTimer = 0f;
 
         public static void Action_ResetCardAngle()
         {
@@ -35,6 +36,7 @@ namespace PlayableSpade
         }
         private static void State_ThrowCards()
         {
+            player.genericTimer += FPStage.deltaTime;
             if (cardTimer > 10)
             {
                 if (player.onGround && player.velocity == Vector2.zero)
@@ -79,7 +81,7 @@ namespace PlayableSpade
             {
                 player.SetPlayerAnimation("AirSpecial", 0f, 0f);
                 player.genericTimer += FPStage.deltaTime;
-                player.energy -= 0.5f;
+                player.energy -= 2f * FPStage.deltaTime;
                 player.velocity.y = 0f;
                 player.angle = 0f;
                 if (player.direction == FPDirection.FACING_LEFT)
@@ -90,7 +92,7 @@ namespace PlayableSpade
                 {
                     player.velocity.x = Mathf.Max(player.velocity.x - player.acceleration * FPStage.deltaTime, -7f);
                 }
-                if (player.energy <= 1f)
+                if (player.energy <= 1f || !player.input.specialHold)
                 {
                     player.genericTimer = 0f;
                     player.SetPlayerAnimation("Jumping", 0f, 0f);
@@ -110,7 +112,15 @@ namespace PlayableSpade
             player.SetPlayerAnimation("AirDash", 0f, 0f, false, true);
             player.genericTimer += FPStage.deltaTime;
             player.superArmor = true;
-            if (player.genericTimer >= 5f || player.colliderWall != null)
+            ghostTimer += FPStage.deltaTime;
+
+            if (ghostTimer >= 1f)
+            {
+                Ghost();
+                ghostTimer = 0f;
+            }
+
+            if (player.genericTimer >= 10f)
             {
                 player.genericTimer = 0f;
                 if (player.onGround)
@@ -129,24 +139,25 @@ namespace PlayableSpade
         {
             if (player.direction == FPDirection.FACING_LEFT)
             {
+                cardAngle += 2;
                 if (player.input.up)
                 {
-                    cardAngle -= 30;
+                    cardAngle += 4;
                 }
                 if (player.input.down && !player.onGround)
                 {
-                    cardAngle += 30;
+                    cardAngle -= 6;
                 }
             }
             else
             {
                 if (player.input.up)
                 {
-                    cardAngle += 30;
+                    cardAngle -= 4;
                 }
                 if (player.input.down && !player.onGround)
                 {
-                    cardAngle -= 30;
+                    cardAngle += 4;
                 }
             }
             for (int i = 1; i <= 3; i++)
@@ -163,7 +174,6 @@ namespace PlayableSpade
                     projectileBasic = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num - Mathf.Sin(0.017453292f * player.angle) * 32f);
                     projectileBasic.velocity.x = Mathf.Cos(0.017453292f * num2) * -16f;
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * -16f;
-                    projectileBasic.angle *= -1;
                 }
                 else
                 {
@@ -179,6 +189,8 @@ namespace PlayableSpade
                 projectileBasic.angle = num2;
                 projectileBasic.ignoreTerrain = false;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
+                projectileBasic.explodeTimer = 50f;
+                projectileBasic.terminalVelocity = 0f;
                 projectileBasic.sfxExplode = null;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
@@ -216,6 +228,8 @@ namespace PlayableSpade
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.sfxExplode = null;
+                projectileBasic.terminalVelocity = 0f;
+                projectileBasic.explodeTimer = 50f;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
                 Action_PlaySound(sfxThrowDualCard,0.7f);
@@ -238,12 +252,12 @@ namespace PlayableSpade
 
         public static void Action_Spade_Dash(float dashSpeed)
         {
-            if (upDash)
-            {
                 if (player.input.up || player.input.upPress)
                 {
                     player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
                     upDash = false;
+                    player.genericTimer = 0;
+                    ghostTimer = 0;
                     player.state = new FPObjectState(State_Spade_AirDash);
                 }
                 else if (player.direction == FPDirection.FACING_RIGHT)
@@ -256,6 +270,8 @@ namespace PlayableSpade
                     {
                         player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
                         upDash = false;
+                        player.genericTimer = 0;
+                        ghostTimer = 0;
                         player.state = new FPObjectState(State_Spade_AirDash);
                     }
                 }
@@ -267,9 +283,10 @@ namespace PlayableSpade
                 {
                     player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
                     upDash = false;
+                    player.genericTimer = 0;
+                    ghostTimer = 0;
                     player.state = new FPObjectState(State_Spade_AirDash);
-                }
-            }
+                }            
         }
 
         public static void Action_Spade_AirMoves()
@@ -292,13 +309,21 @@ namespace PlayableSpade
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
-                GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
-                guardFlash.parentObject = player;
-                player.guardTime = 50f;
-                if (player.energy > 25 && !autoGuard)
+                if (player.energy > 25 && !autoGuard && upDash)
                 {
+                    GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
+                    guardFlash.parentObject = player;
+                    guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+                    player.guardTime = 50f;
                     Action_Spade_Dash(45f);
-                    player.energy -= 25;
+                    player.energy -= 25f;
+                } 
+                else
+                {
+                    GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
+                    guardFlash.parentObject = player;
+                    guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+                    player.guardTime = 50f;
                 }
             }
         }
@@ -311,18 +336,44 @@ namespace PlayableSpade
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
             }
-            if (player.guardTime <= 0f && (player.input.guardPress || player.input.guardHold))
+            else if ((player.input.specialPress || player.input.specialHold) && player.input.up && !(player.state == State_DualCrash))
+            {
+                player.idleTimer = -player.fightStanceTime;
+                if (player.energy > 50)
+                {
+                    player.energy -= 50f;
+                    //    player.state = new FPObjectState(State_DualCrash);
+                }
+            }
+            else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && !(player.state == State_DualCrash))
+            {
+                player.idleTimer = -player.fightStanceTime;
+                if (player.energy > 50)
+                {
+                    player.energy -= 50f;
+                    //    player.state = new FPObjectState(State_DualCrash);
+                }
+            }
+            else if (player.guardTime <= 0f && (player.input.guardPress || player.input.guardHold))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
-                GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
-                guardFlash.parentObject = player;
-                player.guardTime = 50f;
-                if (player.energy > 25 && !autoGuard)
+                if (player.energy > 25 && !autoGuard && upDash)
                 {
+                    GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
+                    guardFlash.parentObject = player;
+                    guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
+                    player.guardTime = 50f;
                     Action_Spade_Dash(90f);
-                    player.energy -= 25;
+                    player.energy -= 25f;
+                } 
+                else
+                {
+                    GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
+                    guardFlash.parentObject = player;
+                    guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+                    player.guardTime = 50f;
                 }
             }
         }
@@ -371,6 +422,19 @@ namespace PlayableSpade
             player.Action_Jump();
         }
 
+        private static void Ghost()
+        {
+            Color start = new Color(0f, 1f, 0f, 1f);
+            Color end = new Color(0f, 1f, 0f, 0f);
+            SpriteGhost spriteGhost = (SpriteGhost)FPStage.CreateStageObject(SpriteGhost.classID, player.transform.position.x, player.transform.position.y);
+            spriteGhost.transform.rotation = player.transform.rotation;
+            spriteGhost.SetUp(player.gameObject.GetComponent<SpriteRenderer>().sprite, start, end, 0.5f, 3f);
+            spriteGhost.transform.localScale = player.transform.localScale;
+            spriteGhost.maxLifeTime = 0.5f;
+            spriteGhost.growSpeed = 0f;
+            spriteGhost.activationMode = FPActivationMode.ALWAYS_ACTIVE;
+        }
+
         [HarmonyReversePatch]
         [HarmonyPatch(typeof(FPPlayer), "ApplyGroundForces", MethodType.Normal)]
         public static void ApplyGroundForces(FPPlayer instance, bool ignoreDirectionalInput)
@@ -397,36 +461,21 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPPlayer), "Start", MethodType.Normal)]
         static void PatchPlayerStart(FPPlayer __instance)
         {
-            UnityEngine.Object[] assets = Plugin.moddedBundle.LoadAllAssets();
 
-            foreach (var asset in assets)
-            {
-                if (asset.GetType() == typeof(RuntimeAnimatorController))
-                {
-                    if (asset.name == "Spade Animator Player")
-                    {
-                        spadeAnimator = (RuntimeAnimatorController)asset;
-                        spadeAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-                    }
-                    if (asset.name == "ThrowingCard")
-                    {
-                        cardAnimator = (RuntimeAnimatorController)asset;
-                        cardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+            spadeAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-                        dualCardAnimator = (RuntimeAnimatorController)asset;
-                        dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-                    }
-                }
-                if (asset.GetType() == typeof(AudioClip))
-                {
-                    if (asset.name == "DiscThrow")
-                    {
-                        sfxThrowCard= (AudioClip)asset;
-                        sfxThrowDualCard = (AudioClip)asset;
-                    }
-                }
+            cardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            cardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            }
+            dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            
+            sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
+            sfxThrowDualCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
+
+            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("DashGhost"));
+
             player = __instance;
             upDash = true;
         }
@@ -682,6 +731,13 @@ namespace PlayableSpade
             codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
 
             return codes;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FPPlayer), "State_Swimming", MethodType.Normal)]
+        static void PatchPlayerSwim()
+        {
+            upDash = true;
         }
 
         [HarmonyTranspiler]

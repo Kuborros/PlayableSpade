@@ -33,6 +33,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchBFFCombiner));
             harmony.PatchAll(typeof(PatchFPHudDigit));
             harmony.PatchAll(typeof(PatchFPHudMaster));
+            harmony.PatchAll(typeof(PatchSBBeaconCutscene));
         }
     }
 }
