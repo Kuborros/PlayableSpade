@@ -34,6 +34,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPHudDigit));
             harmony.PatchAll(typeof(PatchFPHudMaster));
             harmony.PatchAll(typeof(PatchSBBeaconCutscene));
+            harmony.PatchAll(typeof(PatchBakunawaFusion));
         }
     }
 }
