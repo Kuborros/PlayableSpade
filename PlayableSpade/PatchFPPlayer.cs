@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Policy;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -14,6 +15,7 @@ namespace PlayableSpade
         private static int cardAngle;
         public static RuntimeAnimatorController cardAnimator;
         public static RuntimeAnimatorController dualCardAnimator;
+        //public static RuntimeAnimatorController captureCardAnimator;
         public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
@@ -26,14 +28,114 @@ namespace PlayableSpade
         protected static float cardTimer;
         protected static float crashTimer;
         protected static float speedMultiplier;
+        protected static float guardBuffer;
         protected static bool upDash;
         protected static bool autoGuard;
         protected static float ghostTimer = 0f;
+
+        private static List<FPBaseEnemy> cardTargetedEnemies;
+        private static int captureCardCount = 3;
+        private static float captureCardRange = 512f;
+        private static float captureCardDamage = 4f;
 
         public static void Action_ResetCardAngle()
         {
             cardAngle = 0;
         }
+
+        private static void UpdateCardTargetedEnemies()
+        {
+            List<FPBaseEnemy> enemyListInMissileRange = GetEnemyListInCardRange();
+            enemyListInMissileRange.Sort(new Comparison<FPBaseEnemy>(CompareCardTargets));
+            int i = 0;
+            while (i < enemyListInMissileRange.Count - 1)
+            {
+                if (ReferenceEquals(enemyListInMissileRange[i], enemyListInMissileRange[i + 1]))
+                {
+                    enemyListInMissileRange.RemoveAt(i + 1);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            cardTargetedEnemies = new List<FPBaseEnemy>(Mathf.Min(enemyListInMissileRange.Count, captureCardCount));
+            i = 0;
+            while (i < enemyListInMissileRange.Count && cardTargetedEnemies.Count < captureCardCount)
+            {
+                if (!(enemyListInMissileRange[i] == null))
+                {
+                    if (!cardTargetedEnemies.Contains(enemyListInMissileRange[i]))
+                    {
+                        cardTargetedEnemies.Add(enemyListInMissileRange[i]);
+                    }
+                }
+                i++;
+            }
+        }
+
+        private static int CompareCardTargets(FPBaseEnemy enemy1, FPBaseEnemy enemy2)
+        {
+            if (ReferenceEquals(enemy1, enemy2))
+            {
+                return 0;
+            }
+            if (enemy1 == null)
+            {
+                return 1;
+            }
+            if (enemy2 == null)
+            {
+                return -1;
+            }
+            float num = Vector2.SqrMagnitude(player.position - enemy1.position);
+            float num2 = Vector2.SqrMagnitude(player.position - enemy2.position);
+            if (num < num2)
+            {
+                return -1;
+            }
+            if (num > num2)
+            {
+                return 1;
+            }
+            if (enemy1.stageListPos < enemy2.stageListPos)
+            {
+                return -1;
+            }
+            if (enemy1.stageListPos > enemy2.stageListPos)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
+
+        private static List<FPBaseEnemy> GetEnemyListInCardRange()
+        {
+            List<FPBaseEnemy> list = new List<FPBaseEnemy>();
+            float num = captureCardRange * captureCardRange;
+            foreach (FPBaseEnemy fpbaseEnemy in FPStage.GetActiveEnemies(false, false))
+            {
+                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || (player != null && fpbaseEnemy.faction != player.faction)) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num)
+                {
+                    list.Add(fpbaseEnemy);
+                }
+            }
+            return list;
+        }
+
+        private static Vector2 GetTargetOffset(FPBaseEnemy enemy)
+        {
+            FPHitBox hbWeakpoint = enemy.hbWeakpoint;
+            if (enemy.GetComponent<MonsterCube>() != null)
+            {
+                hbWeakpoint = enemy.GetComponent<MonsterCube>().childWeakpoint.hbWeakpoint;
+            }
+            float x = UnityEngine.Random.Range(hbWeakpoint.left, hbWeakpoint.right);
+            float y = UnityEngine.Random.Range(hbWeakpoint.bottom, hbWeakpoint.top);
+            return new Vector2(x, y);
+        }
+
         private static void State_ThrowCards()
         {
             player.genericTimer += FPStage.deltaTime;
@@ -133,6 +235,87 @@ namespace PlayableSpade
                 }
                 return;
             }
+        }
+
+        private static void State_Spade_CaptureCard()
+        {
+            player.SetPlayerAnimation("Throw", 0f, 0f, false, true);
+            player.genericTimer += FPStage.deltaTime;
+            if (player.genericTimer >= 10f)
+            {
+                player.genericTimer = 0f;
+                if (player.onGround)
+                {
+                    player.state = new FPObjectState(player.State_Ground);
+                }
+                else
+                {
+                    player.state = new FPObjectState(player.State_InAir);
+                }
+                return;
+            }
+            Action_ResetCardAngle();
+        }
+
+        private static void State_Spade_ThunderCard()
+        {
+            player.SetPlayerAnimation("Throw", 0f, 0f, false, true);
+            player.genericTimer += FPStage.deltaTime;
+            if (player.genericTimer >= 10f)
+            {
+                player.genericTimer = 0f;
+                if (player.onGround)
+                {
+                    player.state = new FPObjectState(player.State_Ground);
+                }
+                else
+                {
+                    player.state = new FPObjectState(player.State_InAir);
+                }
+                return;
+            }
+        }
+
+        private static void Action_SpadeThrowCaptureCard()
+        {
+            UpdateCardTargetedEnemies();
+            List<FPBaseEnemy> list = cardTargetedEnemies;
+            Vector3 localScale = player.transform.localScale;
+            int num = 0;
+            FPAudio.PlaySfx(sfxThrowCard);
+            if (player.direction == FPDirection.FACING_LEFT) cardAngle += 2;
+            for (int i = 0; i < captureCardCount; i++)
+            {
+                BFFMicroMissile bffmicroMissile;
+                if (player.direction == FPDirection.FACING_LEFT) {
+                    bffmicroMissile = (BFFMicroMissile)FPStage.CreateStageObject(BFFMicroMissile.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 - Mathf.Sin(0.017453292f * player.angle) * 32f);
+                }
+                else
+                {
+                    bffmicroMissile = (BFFMicroMissile)FPStage.CreateStageObject(BFFMicroMissile.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 + Mathf.Sin(0.017453292f * player.angle) * 32f);
+                }
+                bffmicroMissile.transform.rotation = Quaternion.Euler(0f, 0f, player.angle + 20f - cardAngle * 10f + ((localScale.x < 0f) ? 180 : 0));
+                if (list.Count > 0)
+                {
+                    bffmicroMissile.AssignTarget(list[num], GetTargetOffset(list[num]));
+                    num++;
+                    if (num >= list.Count)
+                    {
+                        num = 0;
+                    }
+                }
+                cardAngle++;
+                bffmicroMissile.attackPower = captureCardDamage;
+                bffmicroMissile.turnSpeed = 50;
+                //bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = cardAnimator;
+                bffmicroMissile.ignoreTerrain = true;
+                bffmicroMissile.faction = player.faction;
+            }
+
+        }
+
+        private static void Action_SpadeThrowThunderCard()
+        {
         }
 
         private static void Action_SpadeThrowCard()
@@ -322,6 +505,8 @@ namespace PlayableSpade
                 } 
                 else
                 {
+                    player.SetPlayerAnimation("GuardAir", 0f, 0f, false, true);
+                    player.animator.SetSpeed(Mathf.Max(1f, 0.7f + Mathf.Abs(player.velocity.x * 0.05f)));
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
@@ -341,19 +526,23 @@ namespace PlayableSpade
             else if ((player.input.specialPress || player.input.specialHold) && player.input.up && !(player.state == State_DualCrash))
             {
                 player.idleTimer = -player.fightStanceTime;
-                if (player.energy > 50)
+                if (player.energy > 75)
                 {
-                    player.energy -= 50f;
-                    //    player.state = new FPObjectState(State_DualCrash);
+                    player.energy -= 75f;
+                    player.genericTimer = 0f;
+                    Action_SpadeThrowThunderCard();
+                    player.state = new FPObjectState(State_Spade_ThunderCard);
                 }
             }
             else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && !(player.state == State_DualCrash))
             {
                 player.idleTimer = -player.fightStanceTime;
-                if (player.energy > 50)
+                if (player.energy > 25)
                 {
-                    player.energy -= 50f;
-                    //    player.state = new FPObjectState(State_DualCrash);
+                    player.energy -= 25f;
+                    player.genericTimer = 0f;
+                    Action_SpadeThrowCaptureCard();
+                    player.state = new FPObjectState(State_Spade_CaptureCard);
                 }
             }
             else if (player.guardTime <= 0f && (player.input.guardPress || player.input.guardHold))
@@ -458,6 +647,13 @@ namespace PlayableSpade
             if (player.guardTime <= 0f) autoGuard = false;
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FPPlayer), "LateUpdate", MethodType.Normal)]
+        static void PatchPlayerLateUpdate(float ___guardBuffer)
+        {
+            guardBuffer = ___guardBuffer;
+        }
+
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(FPPlayer), "Start", MethodType.Normal)]
@@ -472,11 +668,16 @@ namespace PlayableSpade
 
             dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
             dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-            
+
+            //captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            //captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
             sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
             sfxThrowDualCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
             GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("DashGhost"));
+
+            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
 
             player = __instance;
             upDash = true;
