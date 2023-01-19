@@ -1,11 +1,9 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Linq;
 using System.Reflection.Emit;
-using System.Security.Policy;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -15,7 +13,7 @@ namespace PlayableSpade
         private static int cardAngle;
         public static RuntimeAnimatorController cardAnimator;
         public static RuntimeAnimatorController dualCardAnimator;
-        //public static RuntimeAnimatorController captureCardAnimator;
+        public static RuntimeAnimatorController captureCardAnimator;
         public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
@@ -171,9 +169,13 @@ namespace PlayableSpade
                     player.state = new FPObjectState(player.State_InAir);
                 }
             }
-            if (!player.onGround) 
-            { 
-                ApplyGravityForce();
+            if (!player.onGround)
+            {
+                if (player.targetWaterSurface != null)
+                {
+                    ApplyWaterForces(player);
+                }
+                else ApplyGravityForce();
             }
         }
 
@@ -183,7 +185,7 @@ namespace PlayableSpade
             {
                 player.SetPlayerAnimation("AirSpecial", 0f, 0f);
                 player.genericTimer += FPStage.deltaTime;
-                player.energy -= 2f * FPStage.deltaTime;
+                player.energy -= 1.5f * FPStage.deltaTime;
                 player.velocity.y = 0f;
                 player.angle = 0f;
                 if (player.direction == FPDirection.FACING_LEFT)
@@ -307,7 +309,11 @@ namespace PlayableSpade
                 cardAngle++;
                 bffmicroMissile.attackPower = captureCardDamage;
                 bffmicroMissile.turnSpeed = 50;
-                //bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = cardAnimator;
+                if (FPStage.stageNameString == "Nalao Lake")
+                {
+                    bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = cardAnimator;
+                    bffmicroMissile.gameObject.GetComponent<LineRenderer>().enabled = false;
+                }
                 bffmicroMissile.ignoreTerrain = true;
                 bffmicroMissile.faction = player.faction;
             }
@@ -489,7 +495,7 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardHold || player.input.guardHold))
+            else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
@@ -545,7 +551,7 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_Spade_CaptureCard);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardPress || player.input.guardHold))
+            else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
@@ -634,6 +640,14 @@ namespace PlayableSpade
             throw new NotImplementedException("Method failed to reverse patch!");
         }
 
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyWaterForces", MethodType.Normal)]
+        public static void ApplyWaterForces(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "Update", MethodType.Normal)]
@@ -669,8 +683,8 @@ namespace PlayableSpade
             dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
             dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            //captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
-            //captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
             sfxThrowDualCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");

@@ -1,9 +1,5 @@
 ﻿using HarmonyLib;
-using Rewired;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -16,6 +12,11 @@ namespace PlayableSpade
         {
             GameObject spadeObject = Plugin.moddedBundle.LoadAsset<GameObject>("Player Spade");
             ___playerList = ___playerList.AddItem(spadeObject.GetComponent<FPPlayer>()).ToArray();
+
+            if (FPStage.stageNameString != "Nalao Lake" || FPStage.stageNameString != "The Battlesphere")
+            {
+                PatchBFFMicroMissile.BFFActive = false;
+            }
         }
     }
 }
