@@ -10,7 +10,6 @@ namespace PlayableSpade
 {
     internal class PatchFPPlayer
     {
-        private static int cardAngle;
         public static RuntimeAnimatorController cardAnimator;
         public static RuntimeAnimatorController dualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
@@ -35,6 +34,7 @@ namespace PlayableSpade
         private static int captureCardCount = 3;
         private static float captureCardRange = 512f;
         private static float captureCardDamage = 4f;
+        private static int cardAngle;
 
         public static void Action_ResetCardAngle()
         {
@@ -241,7 +241,15 @@ namespace PlayableSpade
 
         private static void State_Spade_CaptureCard()
         {
-            player.SetPlayerAnimation("Throw", 0f, 0f, false, true);
+            if (player.velocity == Vector2.zero)
+            {
+                player.SetPlayerAnimation("Throw", 0f, 0f);
+            }
+            else
+            {
+                player.SetPlayerAnimation("Throw", 0f, 0f); //Replace with RunningThrow when added
+            }
+
             player.genericTimer += FPStage.deltaTime;
             if (player.genericTimer >= 10f)
             {
@@ -695,6 +703,12 @@ namespace PlayableSpade
 
             player = __instance;
             upDash = true;
+
+            if (FPStage.stageNameString == "Lunar Cannon")
+            {
+                player.blueFlashMat = FPStage.player[0].blueFlashMat;
+            }
+
         }
 
         [HarmonyPrefix]
