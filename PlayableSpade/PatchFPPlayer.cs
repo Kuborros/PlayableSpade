@@ -17,6 +17,7 @@ namespace PlayableSpade
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
+        public static bool upDash;
 
         static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
         static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
@@ -26,7 +27,6 @@ namespace PlayableSpade
         protected static float crashTimer;
         protected static float speedMultiplier;
         protected static float guardBuffer;
-        protected static bool upDash;
         protected static bool autoGuard;
         protected static float ghostTimer = 0f;
 
