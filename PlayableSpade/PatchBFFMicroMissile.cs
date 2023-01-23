@@ -21,5 +21,15 @@ namespace PlayableSpade
                 }
             }
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BFFMicroMissile), "State_Done", MethodType.Normal)]
+        static void PatchBFFMicroMissileDone(BFFMicroMissile __instance)
+        {
+            __instance.activationMode = FPActivationMode.NEVER_ACTIVE;
+            __instance.gameObject.SetActive(false);
+
+        }
+
     }
 }
