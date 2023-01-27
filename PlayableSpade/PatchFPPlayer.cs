@@ -330,6 +330,24 @@ namespace PlayableSpade
 
         private static void Action_SpadeThrowThunderCard()
         {
+            for (int i = 1; i <= 5; i++)
+            {
+                StingerBomb stingerBomb;
+                float vel = (i % 3) * 3;
+                if (i < 3) vel *= -1;
+
+                stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y + 10);
+
+                stingerBomb.velocity.y = 15;
+                stingerBomb.velocity.x = vel;
+                stingerBomb.faction = player.faction;
+                stingerBomb.gravityStrength = -1;
+                stingerBomb.direction = player.direction;
+                stingerBomb.type = (StingerBombType)2;
+
+
+
+            }
         }
 
         private static void Action_SpadeThrowCard()

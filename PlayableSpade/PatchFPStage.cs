@@ -17,7 +17,7 @@ namespace PlayableSpade
             {
                 PatchBFFMicroMissile.BFFActive = false;
             }
-            else if (FPStage.stageNameString == "Bakunawa Chase") PatchBFFMicroMissile.BFFActive = true;
+            if (FPStage.stageNameString == "Bakunawa Chase") PatchBFFMicroMissile.BFFActive = true;
         }
     }
 }
