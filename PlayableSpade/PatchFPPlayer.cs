@@ -354,7 +354,7 @@ namespace PlayableSpade
         {
             if (player.direction == FPDirection.FACING_LEFT)
             {
-                cardAngle += 2;
+                if (player.onGround) cardAngle += 2;
                 if (player.input.up)
                 {
                     cardAngle += 4;
@@ -550,23 +550,23 @@ namespace PlayableSpade
         public static void Action_Spade_GroundMoves()
         {
             upDash = true;
-            if ((player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards))) //Base Card Throw
+            if ((player.input.attackPress || player.input.attackHold && player.state != State_ThrowCards)) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
             }
-            else if ((player.input.specialPress || player.input.specialHold) && player.input.up && !(player.state == State_DualCrash))
+            else if ((player.input.specialPress || player.input.specialHold) && player.input.up && player.state != State_Spade_ThunderCard)
             {
                 player.idleTimer = -player.fightStanceTime;
                 if (player.energy > 75)
                 {
-                    player.energy -= 75f;
-                    player.genericTimer = 0f;
-                    Action_SpadeThrowThunderCard();
-                    player.state = new FPObjectState(State_Spade_ThunderCard);
+                    //player.energy -= 75f;
+                    //player.genericTimer = 0f;
+                    //Action_SpadeThrowThunderCard();
+                    //player.state = new FPObjectState(State_Spade_ThunderCard);
                 }
             }
-            else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && !(player.state == State_DualCrash))
+            else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && player.state != State_Spade_CaptureCard)
             {
                 player.idleTimer = -player.fightStanceTime;
                 if (player.energy > 25)
@@ -718,6 +718,8 @@ namespace PlayableSpade
             GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("DashGhost"));
 
             GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
+
+            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("ThunderTrap"));
 
             player = __instance;
             upDash = true;

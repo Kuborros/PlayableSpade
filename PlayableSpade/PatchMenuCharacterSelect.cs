@@ -26,10 +26,10 @@ namespace PlayableSpade
             ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("names_4"));
 
             ___infoText[0].paragraph = ___infoText[0].paragraph.AddToArray("MODDED Type");
-            ___infoText[1].paragraph = ___infoText[1].paragraph.AddToArray("Jump");
-            ___infoText[2].paragraph = ___infoText[2].paragraph.AddToArray("Card Throw");
-            ___infoText[3].paragraph = ___infoText[3].paragraph.AddToArray("Card Rush");
-            ___infoText[4].paragraph = ___infoText[4].paragraph.AddToArray("Dash");
+            ___infoText[1].paragraph = ___infoText[1].paragraph.AddToArray("Card Special");
+            ___infoText[2].paragraph = ___infoText[2].paragraph.AddToArray("Jump");
+            ___infoText[3].paragraph = ___infoText[3].paragraph.AddToArray("Card Throw");
+            ___infoText[4].paragraph = ___infoText[4].paragraph.AddToArray("Dodge Dash");
 
         }
 

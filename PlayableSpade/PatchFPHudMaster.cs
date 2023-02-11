@@ -18,6 +18,9 @@ namespace PlayableSpade
                 if (___hudLifeIcon[0].digitFrames.Length < 16)
                 {
                     ___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("SpadStock"));
+                    //___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("SpadeStock1"));
+                    //___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("SpadeStock2"));
+                    //___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("SpadeStock3"));
                 }
                 ___hudLifeIcon[0].SetDigitValue(16);
             }

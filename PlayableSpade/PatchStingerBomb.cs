@@ -14,7 +14,7 @@ namespace PlayableSpade
                 BFFProjectile explosion = (BFFProjectile)FPStage.CreateStageObject(BFFProjectile.classID , __instance.position.x , __instance.position.y);
                 explosion.parentObject = __instance;
                 explosion.faction = __instance.faction;
-                explosion.scale = new Vector2(1.5f, 1.5f);
+                //explosion.scale = new Vector2(1f, 1f);
                 explosion.velocity = Vector2.zero;
                 explosion.explodeTimer = 50;
             }
