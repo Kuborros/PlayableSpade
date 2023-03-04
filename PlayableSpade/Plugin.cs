@@ -1,14 +1,19 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using System.IO;
 using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.1.0")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
+
+        public static ConfigEntry<bool> configInfiniteDash;
+        public static ConfigEntry<bool> configSillyMode;
+
         private void Awake()
         {
             string assetPath = Path.Combine(Path.GetFullPath("."), "mod_overrides");
@@ -19,6 +24,9 @@ namespace PlayableSpade
                 return;
             }
 
+            configInfiniteDash = Config.Bind("General", "Silly mode", false, "Enables some easter eggs.");
+            configInfiniteDash = Config.Bind("Experimental", "Infinite Air Dash", false, "Allows for infinite air dashes. Affects the balance of the mod.");
+
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
             harmony.PatchAll(typeof(PatchFPPlayer));
             harmony.PatchAll(typeof(PatchItemFuel));
@@ -27,7 +35,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchMenuFile));
             harmony.PatchAll(typeof(PatchFPEventSequence));
             harmony.PatchAll(typeof(PatchParentActivator));
-            harmony.PatchAll(typeof(PatchFPBreakable));
+            harmony.PatchAll(typeof(PatchArenaRace));
             harmony.PatchAll(typeof(PatchMenuCharacterSelect));
             harmony.PatchAll(typeof(PatchMenuPhoto));
             harmony.PatchAll(typeof(PatchBFFCombiner));
@@ -38,7 +46,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchBFFMicroMissile));
             harmony.PatchAll(typeof(PatchPlayerBFF));
             harmony.PatchAll(typeof(PatchGO3DColumn));
-            harmony.PatchAll(typeof(PatchStingerBomb));
+            //harmony.PatchAll(typeof(PatchStingerBomb));
         }
     }
 }

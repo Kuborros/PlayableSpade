@@ -10,7 +10,7 @@ namespace PlayableSpade
 {
     internal class PatchFPPlayer
     {
-        public static RuntimeAnimatorController cardAnimator;
+        public static RuntimeAnimatorController[] cardAnimator;
         public static RuntimeAnimatorController dualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
         public static RuntimeAnimatorController spadeAnimator;
@@ -227,6 +227,7 @@ namespace PlayableSpade
             if (player.genericTimer >= 10f)
             {
                 player.genericTimer = 0f;
+                player.hbAttack.enabled = false;
                 if (player.onGround)
                 {
                     player.state = new FPObjectState(player.State_Ground);
@@ -319,7 +320,7 @@ namespace PlayableSpade
                 bffmicroMissile.turnSpeed = 50;
                 if (FPStage.stageNameString == "Nalao Lake")
                 {
-                    bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = cardAnimator;
+                    bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = captureCardAnimator;
                     bffmicroMissile.gameObject.GetComponent<LineRenderer>().enabled = false;
                 }
                 bffmicroMissile.ignoreTerrain = true;
@@ -396,11 +397,12 @@ namespace PlayableSpade
                     projectileBasic.velocity.x = Mathf.Cos(0.017453292f * num2) * 16f;
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                 }
-                projectileBasic.animatorController = cardAnimator;
+                projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0,3)];
                 projectileBasic.attackPower = 2.5f;
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
+                projectileBasic.scale = new Vector2(0.8f,0.8f);
                 projectileBasic.angle = num2;
                 projectileBasic.ignoreTerrain = false;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
@@ -526,7 +528,7 @@ namespace PlayableSpade
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && upDash)
+                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
@@ -555,17 +557,6 @@ namespace PlayableSpade
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
             }
-            else if ((player.input.specialPress || player.input.specialHold) && player.input.up && player.state != State_Spade_ThunderCard)
-            {
-                player.idleTimer = -player.fightStanceTime;
-                if (player.energy > 75)
-                {
-                    //player.energy -= 75f;
-                    //player.genericTimer = 0f;
-                    //Action_SpadeThrowThunderCard();
-                    //player.state = new FPObjectState(State_Spade_ThunderCard);
-                }
-            }
             else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && player.state != State_Spade_CaptureCard)
             {
                 player.idleTimer = -player.fightStanceTime;
@@ -582,7 +573,7 @@ namespace PlayableSpade
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f);
                 player.Action_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && upDash)
+                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
@@ -703,13 +694,19 @@ namespace PlayableSpade
             spadeAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
             spadeAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            cardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
-            cardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
+            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
+            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
+            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
+            cardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            cardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            cardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            cardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
             dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard");
+            captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
             captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
@@ -1022,6 +1019,7 @@ namespace PlayableSpade
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "State_GrindRail", MethodType.Normal)]
+        [HarmonyPatch(typeof(FPPlayer), "PseudoGrindRail", MethodType.Normal)]
         static void PatchPlayerGrind()
         {
             upDash = true;

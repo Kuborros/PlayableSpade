@@ -23,7 +23,7 @@ namespace PlayableSpade
             spadeWheel.gameObject.transform.parent = __instance.transform;  
             ___characterSprites = ___characterSprites.AddToArray(spadeWheel);
 
-            ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("names_4"));
+            ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spade_NamePlate"));
 
             ___infoText[0].paragraph = ___infoText[0].paragraph.AddToArray("MODDED Type");
             ___infoText[1].paragraph = ___infoText[1].paragraph.AddToArray("Card Special");
@@ -54,7 +54,7 @@ namespace PlayableSpade
         {
             if (__instance.character == 4) 
             {
-                ___characterIcon.digitFrames = ___characterIcon.digitFrames.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("SpadeStock"));
+                ___characterIcon.digitFrames = ___characterIcon.digitFrames.AddToArray(Plugin.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock")[0]);
                 ___characterIcon.SetDigitValue(16);
             }
         }
