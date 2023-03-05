@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PlayableSpade
 {
-    internal class PatchArcabelle
+    internal class PatchAcrabelle
     {
     }
 }

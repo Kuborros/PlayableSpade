@@ -16,36 +16,36 @@ namespace PlayableSpade
         {
             if (!clearReplaced)
             {
-                foreach (MenuFilePanel file in __instance.files)
+                foreach (GameObject gameObject in __instance.clearIcons)
                 {
-                    FPHudDigit[] elements = file.gameObject.GetComponentsInChildren<FPHudDigit>();
-                    foreach (FPHudDigit element in elements)
+                    if (gameObject.name == "Clear")
                     {
-                        if (element.digitValue == 5 && element.digitFrames.Length == 6)
+                        SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
+                            stm.text = "Modded";
+                            stm.Text = "Modded";
+                    }
+                    if (gameObject.name == "Shadow")
+                    {
+                        SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
+                        if (stm.text == "CLEAR")
                         {
-                            GameObject[] objects = file.gameObject.GetComponentsInChildren<GameObject>();
-                            foreach (GameObject gameObject in objects)
-                            {
-                                if (gameObject.name == "Clear")
-                                {
-                                    SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
-                                    stm.text = "Modded";
-                                    stm.Text = "Modded";
-                                }
-                                if (gameObject.name == "Shadow")
-                                {
-                                    SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
-                                    if (stm.text == "Clear")
-                                    {
-                                        stm.text = "Modded";
-                                        stm.Text = "Modded";
-                                    }
-                                }
-                                clearReplaced = true;
-                            }
+                            stm.text = "Modded";
+                            stm.Text = "Modded";
                         }
                     }
+                    clearReplaced = true;
                 }
+            }
+        }
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MenuFile), "GetFileInfo", MethodType.Normal)]
+        static void PatchMenuFileInfo(int fileSlot, MenuFile __instance, ref FPHudDigit[] ___characterIcons)
+        {
+            if (___characterIcons[fileSlot - 1].digitFrames.Length < 8)
+            {
+                Sprite heart = ___characterIcons[fileSlot - 1].digitFrames[6];
+                ___characterIcons[fileSlot - 1].digitFrames[6] = Plugin.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock")[0];
+                ___characterIcons[fileSlot - 1].digitFrames = ___characterIcons[fileSlot - 1].digitFrames.AddToArray(heart);
             }
         }
     }

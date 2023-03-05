@@ -19,9 +19,9 @@ namespace PlayableSpade
         public static FPPlayer player;
         public static bool upDash;
 
-        static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
-        static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
-        static readonly MethodInfo m_GroundMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_GroundMoves());
+        internal static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
+        internal static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
+        internal static readonly MethodInfo m_GroundMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_GroundMoves());
 
         protected static float cardTimer;
         protected static float crashTimer;

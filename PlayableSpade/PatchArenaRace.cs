@@ -10,8 +10,8 @@ namespace PlayableSpade
     internal class PatchArenaRace
     {
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(ArenaRace), "State_CharacterConfirm", MethodType.Normal)]
-        static void PatchCharacterConfirm(ArenaRace __instance, ref FPHudDigit ___hudDistanceMarker)
+        [HarmonyPatch(typeof(ArenaRace), "Start", MethodType.Normal)]
+        static void PatchArenaRaceStart(ArenaRace __instance, ref FPHudDigit ___hudDistanceMarker)
         {
             if (FPStage.currentStage.GetPlayerInstance_FPPlayer().characterID == (FPCharacterID)5 && ___hudDistanceMarker.digitFrames.Length < 16)
             {

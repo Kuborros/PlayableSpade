@@ -10,8 +10,8 @@ namespace PlayableSpade
     internal class PatchBFWallRunZone
     {
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_LookUp", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerLookUpTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        [HarmonyPatch(typeof(BFWallRunZone), "Update", MethodType.Normal)]
+        static IEnumerable<CodeInstruction> BFWallRunZoneTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             Label groundStart = il.DefineLabel();
             Label groundEnd = il.DefineLabel();
