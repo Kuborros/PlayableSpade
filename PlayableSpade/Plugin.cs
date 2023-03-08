@@ -47,6 +47,8 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchPlayerBFF));
             harmony.PatchAll(typeof(PatchGO3DColumn));
             harmony.PatchAll(typeof(PatchBFWallRunZone));
+            harmony.PatchAll(typeof(PatchBSAutoscroller));
+            harmony.PatchAll(typeof(PatchArenaCameraFlash));
         }
     }
 }
