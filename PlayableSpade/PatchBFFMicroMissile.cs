@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using Rewired;
+using UnityEngine;
 
 namespace PlayableSpade
 {
@@ -7,7 +9,7 @@ namespace PlayableSpade
         public static bool BFFActive = false;
         [HarmonyPostfix]
         [HarmonyPatch(typeof(BFFMicroMissile), "State_Default", MethodType.Normal)]
-        static void PatchBFFMicroMissileDefault(ref float ___speed, float ___explodeTimer)
+        static void PatchBFFMicroMissileDefault(BFFMicroMissile __instance, ref float ___speed, float ___explodeTimer)
         {
             if (!BFFActive)
             {
@@ -19,7 +21,29 @@ namespace PlayableSpade
                 {
                     ___speed = 20;
                 }
+
+                if (__instance.target.enemy != null)
+                {
+                    if (__instance.target.enemy.cannotBeFrozen == true)
+                    {
+                        __instance.attackPower = 2;
+                    }
+                }
             }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(BFFMicroMissile), "Collide", MethodType.Normal)]
+        static bool PatchBFFMicroMissileCollide(BFFMicroMissile __instance)
+        {
+            if (!BFFActive)
+            {
+                __instance.collision = true;
+                FPAudio.PlaySfx(25);
+                FPStage.CreateStageObject(Explosion.classID, __instance.position.x, __instance.position.y);
+
+                return false;
+            } else return true;
         }
 
         [HarmonyPostfix]

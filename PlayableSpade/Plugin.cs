@@ -12,6 +12,7 @@ namespace PlayableSpade
         public static AssetBundle moddedBundle;
 
         public static ConfigEntry<bool> configInfiniteDash;
+        public static ConfigEntry<bool> configFullSkip;
         public static ConfigEntry<bool> configSillyMode;
 
         private void Awake()
@@ -26,6 +27,7 @@ namespace PlayableSpade
 
             configInfiniteDash = Config.Bind("General", "Silly mode", false, "Enables some easter eggs.");
             configInfiniteDash = Config.Bind("Experimental", "Infinite Air Dash", false, "Allows for infinite air dashes. Affects the balance of the mod.");
+            configFullSkip = Config.Bind("Experimental", "Skip cutscenes", true, "Automatically skips all in-stage cutscenes.");
 
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
             harmony.PatchAll(typeof(PatchFPPlayer));

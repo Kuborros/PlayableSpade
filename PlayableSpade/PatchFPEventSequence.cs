@@ -1,14 +1,21 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
 
 namespace PlayableSpade
 {
     internal class PatchFPEventSequence
     {
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(FPEventSequence), "State_Default", MethodType.Normal)]
+        static void PatchStateDefault(FPEventSequence __instance)
+        {
+            if (FPSaveManager.character == (FPCharacterID)5 && Plugin.configFullSkip.Value)
+            __instance.Action_SkipScene();
+        }
+
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]

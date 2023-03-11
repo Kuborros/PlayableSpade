@@ -1035,7 +1035,7 @@ namespace PlayableSpade
             List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
             for (var i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
+                if (codes[i].opcode == OpCodes.Switch && (codes[i - 1].opcode == OpCodes.Ldloc_0 || codes[i - 1].opcode == OpCodes.Ldloc_1))
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(airStart).ToArray();
