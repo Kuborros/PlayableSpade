@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace PlayableSpade
 {
@@ -12,8 +13,24 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "State_Default", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
         {
-            if (FPSaveManager.character == (FPCharacterID)5 && Plugin.configFullSkip.Value)
-            __instance.Action_SkipScene();
+            if (FPSaveManager.character == (FPCharacterID)5)
+            {
+                if (__instance.transform.parent != null)
+                {
+                    Transform cutsceneCarol = __instance.transform.parent.gameObject.transform.Find("Cutscene_Carol");
+                    if (cutsceneCarol != null)
+                    {
+                        if (cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
+                        {
+                            cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                            cutsceneCarol.Find("tail").gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
+    
+
+            //__instance.Action_SkipScene();
         }
 
 
