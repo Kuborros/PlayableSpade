@@ -26,8 +26,9 @@ namespace PlayableSpade
                 {
                     if (__instance.target.enemy.cannotBeFrozen == true)
                     {
-                        __instance.attackPower = 2;
+                        __instance.attackPower = 1;
                     }
+                    else __instance.attackPower = 3;
                 }
             }
         }
