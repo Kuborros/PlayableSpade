@@ -10,12 +10,12 @@ namespace PlayableSpade
     {
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(FPEventSequence), "State_Default", MethodType.Normal)]
+        [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
         {
             if (FPSaveManager.character == (FPCharacterID)5)
             {
-                if (__instance.transform.parent != null)
+                if (__instance.transform.parent != null && FPStage.stageNameString != "Nalao Lake")
                 {
                     Transform cutsceneCarol = __instance.transform.parent.gameObject.transform.Find("Cutscene_Carol");
                     if (cutsceneCarol != null)
@@ -27,10 +27,20 @@ namespace PlayableSpade
                         }
                     }
                 }
+                if (__instance.transform.parent != null && FPStage.stageNameString == "Merga")
+                {
+                    Transform eventSequence = __instance.transform.parent.gameObject.transform;
+                    if (eventSequence != null)
+                    {
+                        Transform cutsceneCarol = eventSequence.parent.gameObject.transform.Find("Cutscene_Carol");
+                        if (cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
+                        {
+                            cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                            cutsceneCarol.Find("tail").gameObject.SetActive(false);
+                        }
+                    }
+                }
             }
-    
-
-            //__instance.Action_SkipScene();
         }
 
 
