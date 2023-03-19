@@ -50,6 +50,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchBSAutoscroller));
             harmony.PatchAll(typeof(PatchArenaCameraFlash));
             harmony.PatchAll(typeof(PatchMenuCredits));
+            harmony.PatchAll(typeof(PatchLTNodePlayerBridge));
         }
     }
 }
