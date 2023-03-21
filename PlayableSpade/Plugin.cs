@@ -37,6 +37,8 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchParentActivator));
             harmony.PatchAll(typeof(PatchArenaRace));
             harmony.PatchAll(typeof(PatchMenuCharacterSelect));
+            harmony.PatchAll(typeof(PatchMenuCharacterWheel));
+            harmony.PatchAll(typeof(PatchMenuTutorialPrompt));
             harmony.PatchAll(typeof(PatchMenuPhoto));
             harmony.PatchAll(typeof(PatchBFFCombiner));
             harmony.PatchAll(typeof(PatchFPHudDigit));
