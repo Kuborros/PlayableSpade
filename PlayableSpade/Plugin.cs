@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.0")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.1")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;

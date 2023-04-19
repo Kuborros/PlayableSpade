@@ -1,9 +1,4 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 
 namespace PlayableSpade
 {
@@ -19,7 +14,7 @@ namespace PlayableSpade
                 {
                     if (___voicePlayerKO[i] == 8) ___voicePlayerKO[i] = 9;
                 }
-            }   
+            }
         }
     }
 }

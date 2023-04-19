@@ -1,6 +1,4 @@
 ﻿using HarmonyLib;
-using Rewired;
-using UnityEngine;
 
 namespace PlayableSpade
 {
@@ -44,7 +42,8 @@ namespace PlayableSpade
                 FPStage.CreateStageObject(Explosion.classID, __instance.position.x, __instance.position.y);
 
                 return false;
-            } else return true;
+            }
+            else return true;
         }
 
         [HarmonyPostfix]

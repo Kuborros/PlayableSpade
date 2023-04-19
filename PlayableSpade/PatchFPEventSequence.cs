@@ -25,7 +25,7 @@ namespace PlayableSpade
                             cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
                             cutsceneCarol.Find("tail").gameObject.SetActive(false);
                         }
-                    }               
+                    }
                 }
                 if (__instance.transform.parent != null && FPStage.stageNameString == "Merga")
                 {
@@ -45,7 +45,7 @@ namespace PlayableSpade
                 }
                 if (__instance.transform.Find("Cutscene_Carol_Classic") != null) //Snowfields magic
                 {
-                    Transform cutsceneCarolClassic = __instance.transform.Find("Cutscene_Carol_Classic"); 
+                    Transform cutsceneCarolClassic = __instance.transform.Find("Cutscene_Carol_Classic");
                     if (cutsceneCarolClassic != null)
                     {
                         if (cutsceneCarolClassic.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
@@ -82,7 +82,7 @@ namespace PlayableSpade
                 if (__instance.name == "Event Activator (Classic)" && __instance.transform.parent != null)
                 {
                     if (__instance.transform.parent.gameObject.name == "Ending")
-                    __instance.Action_SkipScene();
+                        __instance.Action_SkipScene();
                 }
             }
         }
@@ -100,7 +100,7 @@ namespace PlayableSpade
                 if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_S)
                 {
                     Label[] targets = (Label[])codes[i].operand;
-                    codes[i+8].labels.Add(carolCheck);
+                    codes[i + 8].labels.Add(carolCheck);
                     targets = targets.AddItem(carolCheck).ToArray();
                     codes[i].operand = targets;
                     break;

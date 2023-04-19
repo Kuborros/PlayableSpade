@@ -1,8 +1,4 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -21,8 +17,8 @@ namespace PlayableSpade
                     if (gameObject.name == "Clear")
                     {
                         SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
-                            stm.text = "Modded";
-                            stm.Text = "Modded";
+                        stm.text = "Modded";
+                        stm.Text = "Modded";
                     }
                     if (gameObject.name == "Shadow")
                     {

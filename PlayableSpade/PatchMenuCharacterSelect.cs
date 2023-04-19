@@ -1,9 +1,7 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -15,12 +13,12 @@ namespace PlayableSpade
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MenuCharacterSelect), "Start", MethodType.Normal)]
-        static void PatchCharacterSelectStart(MenuCharacterSelect __instance ,ref MenuCharacterWheel[] ___characterSprites, ref Sprite[] ___nameLabelSprites, ref MenuText[] ___infoText)
+        static void PatchCharacterSelectStart(MenuCharacterSelect __instance, ref MenuCharacterWheel[] ___characterSprites, ref Sprite[] ___nameLabelSprites, ref MenuText[] ___infoText)
         {
             spadeSelector = GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade"));
             MenuCharacterWheel spadeWheel = spadeSelector.GetComponent<MenuCharacterWheel>();
             spadeWheel.parentObject = __instance;
-            spadeWheel.gameObject.transform.parent = __instance.transform;  
+            spadeWheel.gameObject.transform.parent = __instance.transform;
             ___characterSprites = ___characterSprites.AddToArray(spadeWheel);
 
             ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spade_NamePlate"));
@@ -50,9 +48,9 @@ namespace PlayableSpade
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MenuCharacterSelect), "State_CharacterConfirm", MethodType.Normal)]
-        static void PatchCharacterConfirm(MenuCharacterSelect __instance ,ref FPHudDigit ___characterIcon)
+        static void PatchCharacterConfirm(MenuCharacterSelect __instance, ref FPHudDigit ___characterIcon)
         {
-            if (__instance.character == 4) 
+            if (__instance.character == 4)
             {
                 ___characterIcon.digitFrames = ___characterIcon.digitFrames.AddToArray(Plugin.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock")[0]);
                 ___characterIcon.SetDigitValue(16);

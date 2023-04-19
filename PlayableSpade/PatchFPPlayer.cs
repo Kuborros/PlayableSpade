@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
@@ -141,24 +141,24 @@ namespace PlayableSpade
             {
                 if (player.onGround && player.velocity == Vector2.zero)
                 {
-                    player.SetPlayerAnimation("Throw", 0f, 0f);
+                    player.SetPlayerAnimation("Throw");
                 }
                 else if (player.onGround)
                 {
-                    player.SetPlayerAnimation("Throw", 0f, 0f); //Replace with RunningThrow when added
+                    player.SetPlayerAnimation("Throw"); //Replace with RunningThrow when added
                 }
                 else if (!player.onGround)
                 {
-                    player.SetPlayerAnimation("AirThrow", 0f, 0f);
+                    player.SetPlayerAnimation("AirThrow");
                 }
                 Action_SpadeThrowCard();
-                cardTimer = 0;                
+                cardTimer = 0;
             }
             else
             {
                 if (player.onGround)
                 {
-                    ApplyGroundForces(player,false);
+                    ApplyGroundForces(player, false);
                     if (player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f || (player.input.jumpPress || player.input.jumpHold))
                     {
                         player.state = new FPObjectState(player.State_Ground);
@@ -183,7 +183,7 @@ namespace PlayableSpade
         {
             if (!player.onGround)
             {
-                player.SetPlayerAnimation("AirSpecial", 0f, 0f);
+                player.SetPlayerAnimation("AirSpecial");
                 player.genericTimer += FPStage.deltaTime;
                 player.energy -= 1.5f * FPStage.deltaTime;
                 player.velocity.y = 0f;
@@ -199,12 +199,12 @@ namespace PlayableSpade
                 if (player.energy <= 1f || !player.input.specialHold)
                 {
                     player.genericTimer = 0f;
-                    player.SetPlayerAnimation("Jumping", 0f, 0f);
+                    player.SetPlayerAnimation("Jumping");
                     player.state = new FPObjectState(player.State_InAir);
                     return;
                 }
                 Action_SpadeThrowDualCard();
-            } 
+            }
             else
             {
                 player.state = new FPObjectState(player.State_Ground);
@@ -213,7 +213,7 @@ namespace PlayableSpade
 
         private static void State_Spade_AirDash()
         {
-            player.SetPlayerAnimation("AirDash", 0f, 0f, false, true);
+            player.SetPlayerAnimation("AirDash");
             player.genericTimer += FPStage.deltaTime;
             player.superArmor = true;
             ghostTimer += FPStage.deltaTime;
@@ -244,11 +244,11 @@ namespace PlayableSpade
         {
             if (player.velocity == Vector2.zero)
             {
-                player.SetPlayerAnimation("Throw", 0f, 0f);
+                player.SetPlayerAnimation("Throw");
             }
             else
             {
-                player.SetPlayerAnimation("Throw", 0f, 0f); //Replace with RunningThrow when added
+                player.SetPlayerAnimation("Throw"); //Replace with RunningThrow when added
             }
 
             player.genericTimer += FPStage.deltaTime;
@@ -268,25 +268,6 @@ namespace PlayableSpade
             Action_ResetCardAngle();
         }
 
-        private static void State_Spade_ThunderCard()
-        {
-            player.SetPlayerAnimation("Throw", 0f, 0f, false, true);
-            player.genericTimer += FPStage.deltaTime;
-            if (player.genericTimer >= 10f)
-            {
-                player.genericTimer = 0f;
-                if (player.onGround)
-                {
-                    player.state = new FPObjectState(player.State_Ground);
-                }
-                else
-                {
-                    player.state = new FPObjectState(player.State_InAir);
-                }
-                return;
-            }
-        }
-
         private static void Action_SpadeThrowCaptureCard()
         {
             UpdateCardTargetedEnemies();
@@ -298,7 +279,8 @@ namespace PlayableSpade
             for (int i = 0; i < captureCardCount; i++)
             {
                 BFFMicroMissile bffmicroMissile;
-                if (player.direction == FPDirection.FACING_LEFT) {
+                if (player.direction == FPDirection.FACING_LEFT)
+                {
                     bffmicroMissile = (BFFMicroMissile)FPStage.CreateStageObject(BFFMicroMissile.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 - Mathf.Sin(0.017453292f * player.angle) * 32f);
                 }
                 else
@@ -397,12 +379,12 @@ namespace PlayableSpade
                     projectileBasic.velocity.x = Mathf.Cos(0.017453292f * num2) * 16f;
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                 }
-                projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0,3)];
+                projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
                 projectileBasic.attackPower = 2.5f;
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
-                projectileBasic.scale = new Vector2(0.8f,0.8f);
+                projectileBasic.scale = new Vector2(0.8f, 0.8f);
                 projectileBasic.angle = num2;
                 projectileBasic.ignoreTerrain = false;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
@@ -413,7 +395,7 @@ namespace PlayableSpade
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
                 cardAngle++;
-                Action_PlaySound(sfxThrowCard,0.3f);
+                Action_PlaySound(sfxThrowCard, 0.3f);
 
             }
             player.Process360Movement();
@@ -451,7 +433,7 @@ namespace PlayableSpade
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
-                Action_PlaySound(sfxThrowDualCard,0.7f);
+                Action_PlaySound(sfxThrowDualCard, 0.7f);
                 crashTimer = 0;
             }
             player.Process360Movement();
@@ -471,41 +453,41 @@ namespace PlayableSpade
 
         public static void Action_Spade_Dash(float dashSpeed)
         {
-                if (player.input.up || player.input.upPress)
+            if (player.input.up || player.input.upPress)
+            {
+                player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
+                upDash = false;
+                player.genericTimer = 0;
+                ghostTimer = 0;
+                player.state = new FPObjectState(State_Spade_AirDash);
+            }
+            else if (player.direction == FPDirection.FACING_RIGHT)
+            {
+                if (player.onGround)
                 {
-                    player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
-                    upDash = false;
-                    player.genericTimer = 0;
-                    ghostTimer = 0;
-                    player.state = new FPObjectState(State_Spade_AirDash);
-                }
-                else if (player.direction == FPDirection.FACING_RIGHT)
-                {
-                    if (player.onGround)
-                    {
-                        player.groundVel = Mathf.Max(Mathf.Min(player.groundVel + dashSpeed, 18f), player.groundVel);
-                    }
-                    else
-                    {
-                        player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
-                        upDash = false;
-                        player.genericTimer = 0;
-                        ghostTimer = 0;
-                        player.state = new FPObjectState(State_Spade_AirDash);
-                    }
-                }
-                else if (player.onGround)
-                {
-                    player.groundVel = Mathf.Min(Mathf.Max(player.groundVel - dashSpeed, -18f), player.groundVel);
+                    player.groundVel = Mathf.Max(Mathf.Min(player.groundVel + dashSpeed, 18f), player.groundVel);
                 }
                 else
                 {
-                    player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
+                    player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
                     upDash = false;
                     player.genericTimer = 0;
                     ghostTimer = 0;
                     player.state = new FPObjectState(State_Spade_AirDash);
-                }            
+                }
+            }
+            else if (player.onGround)
+            {
+                player.groundVel = Mathf.Min(Mathf.Max(player.groundVel - dashSpeed, -18f), player.groundVel);
+            }
+            else
+            {
+                player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
+                upDash = false;
+                player.genericTimer = 0;
+                ghostTimer = 0;
+                player.state = new FPObjectState(State_Spade_AirDash);
+            }
         }
 
         public static void Action_Spade_AirMoves()
@@ -513,7 +495,7 @@ namespace PlayableSpade
             if ((player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards))) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
-                player.state = new FPObjectState(State_ThrowCards);                
+                player.state = new FPObjectState(State_ThrowCards);
             }
             else if ((player.input.specialPress || player.input.specialHold) && !(player.state == State_DualCrash))
             {
@@ -536,10 +518,10 @@ namespace PlayableSpade
                     player.guardTime = 50f;
                     Action_Spade_Dash(45f);
                     player.energy -= 25f;
-                } 
+                }
                 else
                 {
-                    player.SetPlayerAnimation("GuardAir", 0f, 0f, false, true);
+                    player.SetPlayerAnimation("GuardAir");
                     player.animator.SetSpeed(Mathf.Max(1f, 0.7f + Mathf.Abs(player.velocity.x * 0.05f)));
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
@@ -581,7 +563,7 @@ namespace PlayableSpade
                     player.guardTime = 50f;
                     Action_Spade_Dash(90f);
                     player.energy -= 25f;
-                } 
+                }
                 else
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -671,7 +653,7 @@ namespace PlayableSpade
         static void PatchPlayerUpdate(FPPlayer __instance, float ___speedMultiplier)
         {
             cardTimer += FPStage.deltaTime;
-            crashTimer+= FPStage.deltaTime;
+            crashTimer += FPStage.deltaTime;
             player = __instance;
             speedMultiplier = ___speedMultiplier;
             if (player.onGround) upDash = true;
@@ -752,7 +734,7 @@ namespace PlayableSpade
             {
                 if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
                 {
-                    Label[] targets = (Label[])codes[i].operand;                 
+                    Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(airStart).ToArray();
                     codes[i].operand = targets;
                     airEnd = (Label)codes[i + 1].operand;
@@ -883,7 +865,7 @@ namespace PlayableSpade
         {
             if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
             {
-                player.SetPlayerAnimation("Jumping", 0f, 0f);
+                player.SetPlayerAnimation("Jumping");
             }
         }
 
