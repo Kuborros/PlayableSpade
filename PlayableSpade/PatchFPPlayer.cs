@@ -508,7 +508,7 @@ namespace PlayableSpade
             else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
-                player.Action_Guard(0f);
+                player.Action_Guard(0f,false);
                 player.Action_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
                 {
@@ -553,7 +553,7 @@ namespace PlayableSpade
             else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
-                player.Action_Guard(0f);
+                player.Action_Guard(0f,false);
                 player.Action_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
                 {

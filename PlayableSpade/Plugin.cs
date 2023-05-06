@@ -6,13 +6,12 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.1")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.2")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
 
         public static ConfigEntry<bool> configInfiniteDash;
-        public static ConfigEntry<bool> configSillyMode;
 
         private void Awake()
         {
@@ -24,7 +23,6 @@ namespace PlayableSpade
                 return;
             }
 
-            configInfiniteDash = Config.Bind("General", "Silly mode", false, "Enables some easter eggs.");
             configInfiniteDash = Config.Bind("Experimental", "Infinite Air Dash", false, "Allows for infinite air dashes. Affects the balance of the mod.");
 
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
