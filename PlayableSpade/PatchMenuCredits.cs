@@ -10,7 +10,7 @@ namespace PlayableSpade
         static void PatchMenuCreditsStart(ref AudioClip[] ___bgmCredits, ref Sprite[] ___characterSprites)
         {
             ___bgmCredits = ___bgmCredits.AddToArray(Plugin.moddedBundle.LoadAsset<AudioClip>("M_Theme_Spade"));
-            ___characterSprites = ___characterSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spadoodle"));
+            ___characterSprites = ___characterSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"));
         }
     }
 }

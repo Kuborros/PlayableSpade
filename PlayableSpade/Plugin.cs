@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.2")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.3.3")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
@@ -51,6 +51,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchArenaCameraFlash));
             harmony.PatchAll(typeof(PatchMenuCredits));
             harmony.PatchAll(typeof(PatchLTNodePlayerBridge));
+            harmony.PatchAll(typeof(PatchMenuWorldMap));
         }
     }
 }

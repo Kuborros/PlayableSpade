@@ -510,7 +510,7 @@ namespace PlayableSpade
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f,false);
                 player.Action_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
+                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
@@ -555,7 +555,7 @@ namespace PlayableSpade
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f,false);
                 player.Action_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value))
+                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;

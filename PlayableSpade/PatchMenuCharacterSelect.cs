@@ -21,7 +21,7 @@ namespace PlayableSpade
             spadeWheel.gameObject.transform.parent = __instance.transform;
             ___characterSprites = ___characterSprites.AddToArray(spadeWheel);
 
-            ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spade_NamePlate"));
+            ___nameLabelSprites = ___nameLabelSprites.AddToArray(Plugin.moddedBundle.LoadAsset<Sprite>("Spade_Name"));
 
             ___infoText[0].paragraph = ___infoText[0].paragraph.AddToArray("MODDED Type");
             ___infoText[1].paragraph = ___infoText[1].paragraph.AddToArray("Card Special");
