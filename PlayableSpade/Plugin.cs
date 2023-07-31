@@ -53,6 +53,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchMenuCredits));
             harmony.PatchAll(typeof(PatchLTNodePlayerBridge));
             harmony.PatchAll(typeof(PatchMenuWorldMap));
+            harmony.PatchAll(typeof(PatchItemStarCard));
         }
     }
 }
