@@ -59,10 +59,10 @@ namespace PlayableSpade
                 {
                     if (__instance.lilac) __instance.carol = true;
 
-                    Transform eventSequence = __instance.transform.parent.gameObject.transform;
+                    Transform eventSequence = __instance.gameObject.transform;
                     if (eventSequence != null)
                     {
-                        Transform cutsceneLilac = eventSequence.parent.gameObject.transform.Find("Cutscene_Lilac_Classic");
+                        Transform cutsceneLilac = eventSequence.Find("Cutscene_Lilac_Classic");
                         if (cutsceneLilac != null)
                         {
                             if (cutsceneLilac.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")

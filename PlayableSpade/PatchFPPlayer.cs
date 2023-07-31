@@ -11,7 +11,11 @@ namespace PlayableSpade
     internal class PatchFPPlayer
     {
         public static RuntimeAnimatorController[] cardAnimator;
+        public static RuntimeAnimatorController[] ironCardAnimator;
+        public static RuntimeAnimatorController shadowCardAnimator;
         public static RuntimeAnimatorController dualCardAnimator;
+        public static RuntimeAnimatorController shadowDualCardAnimator;
+        public static RuntimeAnimatorController ironDualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
         public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
@@ -30,6 +34,7 @@ namespace PlayableSpade
         protected static float guardBuffer;
         protected static bool autoGuard;
         protected static float ghostTimer = 0f;
+        protected static float shadowTimer = 0f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static int captureCardCount = 3;
@@ -364,6 +369,7 @@ namespace PlayableSpade
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
+                projectileBasic.damageElementType = -1;
                 projectileBasic.scale = new Vector2(0.8f, 0.8f);
                 projectileBasic.angle = num2;
                 projectileBasic.ignoreTerrain = false;
@@ -377,8 +383,53 @@ namespace PlayableSpade
                 if (player.powerupTimer > 0)
                 {
                     projectileBasic.attackPower = 5f;
+                    projectileBasic.damageElementType = 4;
+                    projectileBasic.explodeType = FPExplodeType.METALBURST;
+                    projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
+                    projectileBasic.animator = projectileBasic.GetComponent<Animator>();
+                    projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                     //projectileBasic.GetComponent<SpriteRenderer>().color = Color.red;
                 }
+
+                if (shadowTimer > 0)
+                {
+                    ProjectileBasic shadowCard;
+                    if (player.direction == FPDirection.FACING_LEFT)
+                    {
+                        shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num - Mathf.Sin(0.017453292f * player.angle) * 32f);
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * -14f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * -14f;
+                    }
+                    else
+                    {
+                        shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num + Mathf.Sin(0.017453292f * player.angle) * 32f);
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * 14f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 14f;
+                    }
+                    shadowCard.animatorController = shadowCardAnimator;
+                    shadowCard.attackPower = 1.75f;
+                    shadowCard.animator = shadowCard.GetComponent<Animator>();
+                    shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
+                    shadowCard.direction = player.direction;
+                    shadowCard.damageElementType = -1;
+                    shadowCard.scale = new Vector2(0.8f, 0.8f);
+                    shadowCard.angle = num2;
+                    shadowCard.ignoreTerrain = false;
+                    shadowCard.explodeType = FPExplodeType.WHITEBURST;
+                    shadowCard.explodeTimer = 50f;
+                    shadowCard.terminalVelocity = 0f;
+                    shadowCard.gravityStrength = 0;
+                    shadowCard.sfxExplode = null;
+                    shadowCard.parentObject = player;
+                    shadowCard.faction = player.faction;
+                    if (player.powerupTimer > 0)
+                    {
+                        shadowCard.attackPower = 2.5f;
+                        shadowCard.damageElementType = 4;
+                        shadowCard.explodeType = FPExplodeType.METALBURST;
+                    }
+                } 
+
                 cardAngle++;
                 Action_PlaySound(sfxThrowCard, 0.3f);
 
@@ -412,6 +463,7 @@ namespace PlayableSpade
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
+                projectileBasic.damageElementType = -1;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.sfxExplode = null;
                 projectileBasic.gravityStrength = 0;
@@ -422,15 +474,63 @@ namespace PlayableSpade
                 if (player.powerupTimer > 0)
                 {
                     projectileBasic.attackPower = 10f;
-                    //projectileBasic.GetComponent<SpriteRenderer>().color = Color.red;
+                    projectileBasic.damageElementType = 4;
+                    projectileBasic.explodeType = FPExplodeType.METALBURST;
+                    projectileBasic.animatorController = ironDualCardAnimator;
+                    projectileBasic.animator = projectileBasic.GetComponent<Animator>();
+                    projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
+                }
+                if (shadowTimer > 0)
+                {
+                    ProjectileBasic shadowCard;
+                    if (player.direction == FPDirection.FACING_LEFT)
+                    {
+                        shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num - Mathf.Sin(0.017453292f * player.angle) * 32f);
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * -25f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 20f;
+                        shadowCard.angle = 180f - num2;
+                    }
+                    else
+                    {
+                        shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num + Mathf.Sin(0.017453292f * player.angle) * 32f);
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * 25f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 20f;
+                        shadowCard.angle = num2;
+                    }
+                    shadowCard.animatorController = shadowDualCardAnimator;
+                    shadowCard.attackPower = 5f;
+                    shadowCard.animator = shadowCard.GetComponent<Animator>();
+                    shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
+                    shadowCard.direction = FPDirection.FACING_RIGHT;
+                    shadowCard.damageElementType = -1;
+                    shadowCard.explodeType = FPExplodeType.WHITEBURST;
+                    shadowCard.sfxExplode = null;
+                    shadowCard.gravityStrength = 0;
+                    shadowCard.terminalVelocity = 0f;
+                    shadowCard.explodeTimer = 50f;
+                    shadowCard.parentObject = player;
+                    shadowCard.faction = player.faction;
+                    if (player.powerupTimer > 0)
+                    {
+                        shadowCard.attackPower = 10f;
+                        shadowCard.damageElementType = 4;
+                        shadowCard.explodeType = FPExplodeType.METALBURST;
+                    }
                 }
                 Action_PlaySound(sfxThrowDualCard, 0.7f);
-                crashTimer = 0;
-
-                
+                crashTimer = 0;   
             }
             player.Process360Movement();
         }
+
+        public static void Action_Spade_ShadowGuard()
+        {
+            if (player.IsPowerupActive(FPPowerup.SHADOW_GUARD))
+            {
+                shadowTimer = 120f;
+            }
+        }
+
         public static void Action_PlaySound(AudioClip clip, float volume)
         {
             if (clip == null)
@@ -502,7 +602,7 @@ namespace PlayableSpade
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f,false);
-                player.Action_ShadowGuard();
+                Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -547,7 +647,7 @@ namespace PlayableSpade
             {
                 FPAudio.PlaySfx(15);
                 player.Action_Guard(0f,false);
-                player.Action_ShadowGuard();
+                Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -658,6 +758,11 @@ namespace PlayableSpade
         static void PatchPlayerLateUpdate(float ___guardBuffer)
         {
             guardBuffer = ___guardBuffer;
+
+            if (shadowTimer > 0f)
+            {
+                shadowTimer -= FPStage.deltaTime;
+            }
         }
 
 
@@ -678,8 +783,26 @@ namespace PlayableSpade
             cardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
             cardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
+            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
+            ironCardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            ironCardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            ironCardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            ironCardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            shadowCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
+            shadowCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
             dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
             dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            ironDualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
+            ironDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            shadowDualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
+            shadowDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
             captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;

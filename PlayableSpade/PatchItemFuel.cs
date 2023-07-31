@@ -8,11 +8,16 @@ namespace PlayableSpade
 {
     internal class PatchItemFuel
     {
+        protected static Sprite cardsItem;
+
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ItemFuel), "Start", MethodType.Normal)]
         static void PatchStart(ref Sprite[] ___iconSprite)
         {
-            ___iconSprite = ___iconSprite.AddToArray(___iconSprite[3]);
+            cardsItem = Plugin.moddedBundle.LoadAsset<Sprite>("ItemFuelCards");
+
+            ___iconSprite = ___iconSprite.AddToArray(cardsItem);
         }
 
         [HarmonyTranspiler]
