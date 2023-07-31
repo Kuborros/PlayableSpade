@@ -228,6 +228,7 @@ namespace PlayableSpade
             {
                 player.genericTimer = 0f;
                 player.hbAttack.enabled = false;
+                player.superArmor = false;
                 if (player.onGround)
                 {
                     player.state = new FPObjectState(player.State_Ground);
@@ -309,28 +310,6 @@ namespace PlayableSpade
                 bffmicroMissile.faction = player.faction;
             }
 
-        }
-
-        private static void Action_SpadeThrowThunderCard()
-        {
-            for (int i = 1; i <= 5; i++)
-            {
-                StingerBomb stingerBomb;
-                float vel = (i % 3) * 3;
-                if (i < 3) vel *= -1;
-
-                stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y + 10);
-
-                stingerBomb.velocity.y = 15;
-                stingerBomb.velocity.x = vel;
-                stingerBomb.faction = player.faction;
-                stingerBomb.gravityStrength = -1;
-                stingerBomb.direction = player.direction;
-                stingerBomb.type = (StingerBombType)2;
-
-
-
-            }
         }
 
         private static void Action_SpadeThrowCard()
@@ -698,8 +677,6 @@ namespace PlayableSpade
 
             GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
 
-            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("ThunderTrap"));
-
             player = __instance;
             upDash = true;
 
@@ -711,7 +688,7 @@ namespace PlayableSpade
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(FPPlayer), "Action_Hurt", MethodType.Normal)]
+        [HarmonyPatch(typeof(FPPlayer), "AutoGuard", MethodType.Normal)]
         static void PatchPlayerHurt(FPPlayer __instance)
         {
             if (FPSaveManager.assistGuard == 1 && !__instance.IsPowerupActive(FPPowerup.NO_GUARDING) && __instance.guardTime <= 0f && (__instance.state == new FPObjectState(__instance.State_Ground) || __instance.state == new FPObjectState(__instance.State_InAir) || __instance.state == new FPObjectState(__instance.State_LookUp) || __instance.state == new FPObjectState(__instance.State_Crouching) || __instance.state == new FPObjectState(__instance.State_Swimming)))
@@ -719,9 +696,9 @@ namespace PlayableSpade
                 autoGuard = true;
             }
         }
-
+        
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "Action_Hurt", MethodType.Normal)]
+        [HarmonyPatch(typeof(FPPlayer), "AutoGuard", MethodType.Normal)]
         static IEnumerable<CodeInstruction> PlayerHurtTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             Label airStart = il.DefineLabel();
@@ -732,14 +709,14 @@ namespace PlayableSpade
             List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
             for (var i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(airStart).ToArray();
                     codes[i].operand = targets;
                     airEnd = (Label)codes[i + 1].operand;
                 }
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_2)
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(groundStart).ToArray();
