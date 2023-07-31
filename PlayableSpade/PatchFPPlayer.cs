@@ -17,6 +17,7 @@ namespace PlayableSpade
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
+        public static PlayerShadow playerShadow;
         public static bool upDash;
 
         internal static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
@@ -373,6 +374,11 @@ namespace PlayableSpade
                 projectileBasic.sfxExplode = null;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
+                if (player.powerupTimer > 0)
+                {
+                    projectileBasic.attackPower = 5f;
+                    //projectileBasic.GetComponent<SpriteRenderer>().color = Color.red;
+                }
                 cardAngle++;
                 Action_PlaySound(sfxThrowCard, 0.3f);
 
@@ -402,6 +408,7 @@ namespace PlayableSpade
                     projectileBasic.angle = num2;
                 }
                 projectileBasic.animatorController = dualCardAnimator;
+                projectileBasic.attackPower = 5f;
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
@@ -412,8 +419,15 @@ namespace PlayableSpade
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
+                if (player.powerupTimer > 0)
+                {
+                    projectileBasic.attackPower = 10f;
+                    //projectileBasic.GetComponent<SpriteRenderer>().color = Color.red;
+                }
                 Action_PlaySound(sfxThrowDualCard, 0.7f);
                 crashTimer = 0;
+
+                
             }
             player.Process360Movement();
         }

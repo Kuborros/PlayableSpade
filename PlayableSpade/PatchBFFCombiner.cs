@@ -25,7 +25,5 @@ namespace PlayableSpade
             }
             return codes;
         }
-
-
     }
 }

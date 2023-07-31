@@ -27,7 +27,7 @@ namespace PlayableSpade
                 if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_2)
                 {
                     Label[] targets = (Label[])codes[i].operand;
-                    codes[i + 33].labels.Add(fuelCheck);
+                    codes[i + 2].labels.Add(fuelCheck);
                     targets = targets.AddItem(fuelCheck).ToArray();
                     codes[i].operand = targets;
                 }
