@@ -10,28 +10,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(MenuFile), "State_Main", MethodType.Normal)]
         static void PatchMenuFileStateMain(MenuFile __instance)
         {
-            if (!clearReplaced)
-            {
-                foreach (GameObject gameObject in __instance.clearIcons)
-                {
-                    if (gameObject.name == "Clear")
-                    {
-                        SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
-                        stm.text = "Modded";
-                        stm.Text = "Modded";
-                    }
-                    if (gameObject.name == "Shadow")
-                    {
-                        SuperTextMesh stm = gameObject.GetComponent<SuperTextMesh>();
-                        if (stm.text == "CLEAR")
-                        {
-                            stm.text = "Modded";
-                            stm.Text = "Modded";
-                        }
-                    }
-                    clearReplaced = true;
-                }
-            }
+                
         }
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MenuFile), "GetFileInfo", MethodType.Normal)]
