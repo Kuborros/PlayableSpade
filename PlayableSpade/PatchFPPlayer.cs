@@ -397,14 +397,14 @@ namespace PlayableSpade
                     if (player.direction == FPDirection.FACING_LEFT)
                     {
                         shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num - Mathf.Sin(0.017453292f * player.angle) * 32f);
-                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * -14f;
-                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * -14f;
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * -10f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * -16f;
                     }
                     else
                     {
                         shadowCard = (ProjectileBasic)FPStage.CreateStageObject(ProjectileBasic.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * num, player.position.y + Mathf.Cos(0.017453292f * player.angle) * num + Mathf.Sin(0.017453292f * player.angle) * 32f);
-                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * 14f;
-                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 14f;
+                        shadowCard.velocity.x = Mathf.Cos(0.017453292f * num2) * 10f;
+                        shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
                     shadowCard.attackPower = 1.75f;
@@ -601,7 +601,7 @@ namespace PlayableSpade
             else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
-                player.Action_Guard(0f,false);
+                if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
@@ -612,7 +612,7 @@ namespace PlayableSpade
                     Action_Spade_Dash(45f);
                     player.energy -= 25f;
                 }
-                else
+                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING))
                 {
                     player.SetPlayerAnimation("GuardAir");
                     player.animator.SetSpeed(Mathf.Max(1f, 0.7f + Mathf.Abs(player.velocity.x * 0.05f)));
@@ -646,7 +646,7 @@ namespace PlayableSpade
             else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 FPAudio.PlaySfx(15);
-                player.Action_Guard(0f,false);
+                if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
@@ -657,8 +657,8 @@ namespace PlayableSpade
                     Action_Spade_Dash(90f);
                     player.energy -= 25f;
                 }
-                else
-                {
+                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING))
+                    {
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
