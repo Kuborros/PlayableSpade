@@ -42,6 +42,10 @@ namespace PlayableSpade
         private static float captureCardDamage = 4f;
         private static int cardAngle;
 
+        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
+
+
+
         public static void Action_ResetCardAngle()
         {
             cardAngle = 0;
@@ -380,6 +384,8 @@ namespace PlayableSpade
                 projectileBasic.sfxExplode = null;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
+                projectileBasic.timeBeforeCollisions = 0f;
+                projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
                     projectileBasic.attackPower = 5f;
@@ -421,6 +427,8 @@ namespace PlayableSpade
                     shadowCard.sfxExplode = null;
                     shadowCard.parentObject = player;
                     shadowCard.faction = player.faction;
+                    shadowCard.timeBeforeCollisions = 0f;
+                    shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
                         shadowCard.attackPower = 2.5f;
@@ -470,6 +478,7 @@ namespace PlayableSpade
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.parentObject = player;
                 projectileBasic.faction = player.faction;
+                projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
                     projectileBasic.attackPower = 10f;
@@ -509,6 +518,7 @@ namespace PlayableSpade
                     shadowCard.explodeTimer = 50f;
                     shadowCard.parentObject = player;
                     shadowCard.faction = player.faction;
+                    shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
                         shadowCard.attackPower = 10f;

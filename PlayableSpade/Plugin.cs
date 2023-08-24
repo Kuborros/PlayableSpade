@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 using System.IO;
 using UnityEngine;
@@ -13,13 +14,17 @@ namespace PlayableSpade
 
         public static ConfigEntry<bool> configInfiniteDash;
 
+        internal static ManualLogSource logSource;
+
         private void Awake()
         {
+            logSource = Logger;
+
             string assetPath = Path.Combine(Path.GetFullPath("."), "mod_overrides");
             moddedBundle = AssetBundle.LoadFromFile(Path.Combine(assetPath, "playablespade.assets"));
             if (moddedBundle == null)
             {
-                Logger.LogError("Failed to load AssetBundle! Mod cannot work without it, exiting. Please reinstall it.");
+                logSource.LogError("Failed to load AssetBundle! Mod cannot work without it, exiting. Please reinstall it.");
                 return;
             }
 
@@ -56,8 +61,6 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchItemStarCard));
             harmony.PatchAll(typeof(PatchFPBossHud));
             harmony.PatchAll(typeof(PatchMenuWorldMapConfirm));
-
-            //TODO: MenuWorldMapConfirm tutorial prompt
         }
     }
 }
