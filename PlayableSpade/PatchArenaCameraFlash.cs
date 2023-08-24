@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine.SceneManagement;
 
 namespace PlayableSpade
 {
@@ -8,11 +9,14 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(ArenaCameraFlash), "Start", MethodType.Normal)]
         static void PatchArenaFlash(ref int[] ___voicePlayerKO)
         {
-            if (___voicePlayerKO != null && FPStage.currentStage.GetPlayerInstance_FPPlayer().characterID == (FPCharacterID)5)
+            if (SceneManager.GetActiveScene().name != "Cutscene_BattlesphereEnding")
             {
-                for (int i = 0; i < ___voicePlayerKO.Length; i++)
+                if (___voicePlayerKO != null && FPStage.currentStage.GetPlayerInstance_FPPlayer().characterID == (FPCharacterID)5)
                 {
-                    if (___voicePlayerKO[i] == 8) ___voicePlayerKO[i] = 9;
+                    for (int i = 0; i < ___voicePlayerKO.Length; i++)
+                    {
+                        if (___voicePlayerKO[i] == 8) ___voicePlayerKO[i] = 9;
+                    }
                 }
             }
         }

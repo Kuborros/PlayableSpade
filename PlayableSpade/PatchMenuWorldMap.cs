@@ -1,4 +1,7 @@
 ﻿using HarmonyLib;
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -8,6 +11,7 @@ namespace PlayableSpade
 
         private static Sprite[] spadeIdle;
         private static Sprite[] spadeWalk;
+        private static MenuWorldMap currInstance;
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MenuWorldMap), "Start", MethodType.Normal)]
@@ -78,13 +82,95 @@ namespace PlayableSpade
             }
             else
             {
-                ___playerSpriteRenderer.sprite = spadeIdle[Mathf.Min((int)((___animTimer) % 12),6)];
+                ___playerSpriteRenderer.sprite = spadeIdle[Mathf.Min((int)((___animTimer) % 12), 6)];
                 ___playerShadowRenderer.sprite = null;
                 ___playerSpriteRenderer.transform.localPosition = new Vector3(0f, 0f, 0f);
             }
 
             return false;
-
         }
+
+
+        internal static void State_WaitForMenu()
+        {
+            State_WaitForMenu(currInstance);
+        }
+
+        [HarmonyReversePatch(0)]
+        [HarmonyPatch(typeof(MenuWorldMap), "State_WaitForMenu", MethodType.Normal)]
+        public static void State_WaitForMenu(MenuWorldMap instance)
+        {
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MenuWorldMap), "CutsceneCheck", MethodType.Normal)]
+        private static bool PatchCutsceneCheck(MenuWorldMap __instance, ref bool ___cutsceneCheck, ref float ___badgeCheckTimer, ref GameObject ___targetMenu)
+        {
+            if (__instance.cutscenes.Length != 0 && FPSaveManager.character == (FPCharacterID)5)
+            {
+                currInstance = __instance;
+                for (int i = 0; i < __instance.cutscenes.Length; i++)
+                {
+                    if (__instance.cutscenes[i].requiredStoryFlags.Length != 0)
+                    {
+                        int num = __instance.cutscenes[i].requiredStoryFlags.Length;
+                        for (int j = 0; j < __instance.cutscenes[i].requiredStoryFlags.Length; j++)
+                        {
+                            if (FPSaveManager.storyFlag[__instance.cutscenes[i].requiredStoryFlags[j]] > 0)
+                            {
+                                num--;
+                            }
+                        }
+                        for (int k = 0; k < __instance.cutscenes[i].deactivateAtFlag.Length; k++)
+                        {
+                            if (FPSaveManager.storyFlag[__instance.cutscenes[i].deactivateAtFlag[k]] > 0)
+                            {
+                                num = 99;
+                            }
+                        }
+                        if (__instance.cutscenes[i].requiredMap >= 0 && FPSaveManager.lastMap != __instance.cutscenes[i].requiredMap)
+                        {
+                            num = 99;
+                        }
+                        if (__instance.cutscenes[i].requiredLocation >= 0 && FPSaveManager.lastMapLocation != __instance.cutscenes[i].requiredLocation)
+                        {
+                            num = 99;
+                        }
+                        bool flag = false;
+                        for (int l = 0; l < __instance.cutscenes[i].dialogSequence.Length; l++)
+                        {
+                            if (FPSaveManager.character == (FPCharacterID)5 && __instance.cutscenes[i].dialogSequence[l].characters[1])
+                            {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (!flag)
+                        {
+                            num = 99;
+                        }
+                        if (num <= 0)
+                        {
+                            CutsceneDialog cutsceneDialog = UnityEngine.Object.Instantiate<CutsceneDialog>(__instance.menuCutscene);
+                            cutsceneDialog.currentScene = __instance.cutscenes[i].sceneID;
+                            cutsceneDialog.dialogSystem = __instance.dialogSystem;
+                            cutsceneDialog.dialogSequence = __instance.cutscenes[i].dialogSequence;
+                            ___targetMenu = cutsceneDialog.gameObject;
+                            __instance.state = new FPObjectState(State_WaitForMenu);
+                        }
+                        else
+                        {
+                            ___badgeCheckTimer = 1f;
+                        }
+                    }
+                }
+                ___cutsceneCheck = true;
+                return false;
+            }
+            return true;
+        }
+
+
     }
 }

@@ -388,7 +388,6 @@ namespace PlayableSpade
                     projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
                     projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                     projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
-                    //projectileBasic.GetComponent<SpriteRenderer>().color = Color.red;
                 }
 
                 if (shadowTimer > 0)

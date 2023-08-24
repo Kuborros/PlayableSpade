@@ -8,7 +8,7 @@ namespace PlayableSpade
 {
     internal class PatchFPEventSequence
     {
-
+        //Spade Anywhere System™️
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
