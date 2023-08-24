@@ -55,6 +55,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchMenuWorldMap));
             harmony.PatchAll(typeof(PatchItemStarCard));
             harmony.PatchAll(typeof(PatchFPBossHud));
+            harmony.PatchAll(typeof(PatchMenuWorldMapConfirm));
 
             //TODO: MenuWorldMapConfirm tutorial prompt
         }
