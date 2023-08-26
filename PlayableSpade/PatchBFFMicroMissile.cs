@@ -29,6 +29,10 @@ namespace PlayableSpade
                     else __instance.attackPower = 3;
                 }
             }
+            else
+            {
+                __instance.attackPower = 20;
+            }
         }
 
         [HarmonyPrefix]
