@@ -35,6 +35,7 @@ namespace PlayableSpade
         protected static bool autoGuard;
         protected static float ghostTimer = 0f;
         protected static float shadowTimer = 0f;
+        protected static float dashTime = 0f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static int captureCardCount = 3;
@@ -607,28 +608,29 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
+            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
-                FPAudio.PlaySfx(15);
-                if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) player.Action_Guard(0f,false);
+                player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
+                    FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
-                    player.guardTime = 50f;
+                    dashTime = 40f;
                     Action_Spade_Dash(45f);
                     player.energy -= 25f;
                 }
                 else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING))
                 {
+                    FPAudio.PlaySfx(15);
                     player.SetPlayerAnimation("GuardAir");
                     player.animator.SetSpeed(Mathf.Max(1f, 0.7f + Mathf.Abs(player.velocity.x * 0.05f)));
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-                    player.guardTime = 50f;
+                    dashTime = 40f;
                 }
             }
         }
@@ -652,26 +654,26 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_Spade_CaptureCard);
                 }
             }
-            else if (player.guardTime <= 0f && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
-            {
-                FPAudio.PlaySfx(15);
-                if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) player.Action_Guard(0f,false);
+            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
+            {                
+                player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
+                    FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.green;
-                    player.guardTime = 50f;
+                    dashTime = 40f;
                     Action_Spade_Dash(90f);
                     player.energy -= 25f;
                 }
-                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING))
-                    {
+                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) {
+                    FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
                     guardFlash.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-                    player.guardTime = 50f;
+                    dashTime = 40f;
                 }
             }
         }
@@ -771,6 +773,11 @@ namespace PlayableSpade
             if (shadowTimer > 0f)
             {
                 shadowTimer -= FPStage.deltaTime;
+            }
+
+            if (dashTime > 0f)
+            {
+                dashTime -= FPStage.deltaTime;
             }
         }
 
