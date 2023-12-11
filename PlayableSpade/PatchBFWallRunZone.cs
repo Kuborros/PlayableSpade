@@ -17,7 +17,7 @@ namespace PlayableSpade
             List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
             for (var i = 1; i < codes.Count; i++)
             {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_2)
+                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_3)
                 {
                     Label[] targets = (Label[])codes[i].operand;
                     targets = targets.AddItem(groundStart).ToArray();
