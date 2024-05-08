@@ -14,6 +14,7 @@ namespace PlayableSpade
                 __instance.assistRoster.Add(Bakunawa.Assist.Neera);
                 __instance.assistRoster.Add(Bakunawa.Assist.Carol);
                 __instance.assistRoster.Add(Bakunawa.Assist.Lilac);
+                __instance.assistRoster.Add(Bakunawa.Assist.Merga);
             }
         }
     }

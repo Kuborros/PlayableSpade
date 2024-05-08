@@ -14,17 +14,17 @@ namespace PlayableSpade
         static void PatchAnimatorPreInit(ref AnimatorInitializationParams[] ___animatorsToInit)
         {
             AnimatorInitializationParams spadeInit = new AnimatorInitializationParams();
-            spadeInit.animator = Plugin.moddedBundle.LoadAsset<Animator>("");
+            spadeInit.animator = Plugin.moddedBundle.LoadAsset<Animator>("Spade Animator Player");
 
             AnimatorInitializationClipParams[] clipsToInit = {
 
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams(""),
-                new AnimatorInitializationClipParams("")
+                new AnimatorInitializationClipParams("Idle"),
+                new AnimatorInitializationClipParams("Running"),
+                new AnimatorInitializationClipParams("Rolling"),
+                new AnimatorInitializationClipParams("Jumping"),
+                new AnimatorInitializationClipParams("Throw"),
+                new AnimatorInitializationClipParams("AirThrow"),
+                new AnimatorInitializationClipParams("Pose1")
 
             };
             spadeInit.animationClipsToPlay = clipsToInit;

@@ -62,6 +62,9 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPBossHud));
             harmony.PatchAll(typeof(PatchMenuWorldMapConfirm));
             harmony.PatchAll(typeof(PatchFPHubNPC));
+            harmony.PatchAll(typeof(PatchSaga));
+            harmony.PatchAll(typeof(PatchAnimatorPreInitializer));
+            harmony.PatchAll(typeof(PatchAcrabellePieTrap));
         }
     }
 }

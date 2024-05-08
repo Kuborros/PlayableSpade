@@ -823,7 +823,7 @@ namespace PlayableSpade
             captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
             captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
+            sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
             sfxThrowDualCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
             GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("DashGhost"));
