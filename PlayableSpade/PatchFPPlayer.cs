@@ -156,7 +156,7 @@ namespace PlayableSpade
                 }
                 else if (player.onGround)
                 {
-                    player.SetPlayerAnimation("Throw"); //Replace with RunningThrow when added
+                    player.SetPlayerAnimation("RunningThrow");
                 }
                 else if (!player.onGround)
                 {
@@ -260,7 +260,7 @@ namespace PlayableSpade
             }
             else
             {
-                player.SetPlayerAnimation("Throw"); //Replace with RunningThrow when added
+                player.SetPlayerAnimation("RunningThrow");
             }
 
             player.genericTimer += FPStage.deltaTime;
