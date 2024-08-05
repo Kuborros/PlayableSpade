@@ -3,6 +3,8 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.IO;
+using FP2Lib.Badge;
+using FP2Lib.Vinyl;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -29,6 +31,16 @@ namespace PlayableSpade
             }
 
             configInfiniteDash = Config.Bind("Experimental", "FP1 Air Dash", false, "Switches dash to FP1-style one.");
+
+
+            VinylHandler.RegisterVinyl("kubo.m_clear_spade","Results - Spade",moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade"),VAddToShop.Naomi);
+            VinylHandler.RegisterVinyl("kubo.m_theme_spade", "Spade's Theme", moddedBundle.LoadAsset<AudioClip>("M_Theme_Spade"), VAddToShop.Fawnstar);
+
+            BadgeHandler.RegisterBadge("kubo.spaderunner","Red Scarf Runner", "Beat any stage's par time as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[0], FPBadgeType.SILVER);
+            BadgeHandler.RegisterBadge("kubo.spadespeedrunner", "Red Scarf Speedrunner", "Beat any stage as Spade in less than half of the par time.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[1], FPBadgeType.SILVER);
+            BadgeHandler.RegisterBadge("kubo.spademaster", "Red Scarf Master", "Beat the par times in all stages as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[2], FPBadgeType.GOLD);
+            BadgeHandler.RegisterBadge("kubo.spadecomplete", "The House Always Wins", "Finish the game as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[3], FPBadgeType.GOLD);
+
 
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
             harmony.PatchAll(typeof(PatchFPPlayer));
@@ -65,6 +77,9 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchSaga));
             harmony.PatchAll(typeof(PatchAnimatorPreInitializer));
             harmony.PatchAll(typeof(PatchAcrabellePieTrap));
+            harmony.PatchAll(typeof(PatchFPSaveManager));
+            harmony.PatchAll(typeof(PatchFPResultsMenu));
+            harmony.PatchAll(typeof(PatchMenuShop));
         }
     }
 }
