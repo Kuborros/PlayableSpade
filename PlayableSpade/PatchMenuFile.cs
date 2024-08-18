@@ -5,13 +5,7 @@ namespace PlayableSpade
 {
     internal class PatchMenuFile
     {
-        private static bool clearReplaced = false;
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(MenuFile), "State_Main", MethodType.Normal)]
-        static void PatchMenuFileStateMain(MenuFile __instance)
-        {
-                
-        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MenuFile), "GetFileInfo", MethodType.Normal)]
         static void PatchMenuFileInfo(int fileSlot, MenuFile __instance, ref FPHudDigit[] ___characterIcons)
