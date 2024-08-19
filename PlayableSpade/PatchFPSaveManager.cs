@@ -27,7 +27,7 @@ namespace PlayableSpade
                     int stagetime = (FPStage.currentStage.milliSeconds + FPStage.currentStage.seconds * 100) + FPStage.currentStage.minutes * 6000;
                     if (stagetime > 0 && stagetime < FPSaveManager.GetStageParTime(FPStage.currentStage.stageID))
                     {
-                        FPSaveManager.ForceBadgeUnlock(badgeID);
+                        BadgeHandler.UnlockBadge("kubo.spaderunner");
                     }
                 }
                 //Half par time.
@@ -36,7 +36,7 @@ namespace PlayableSpade
                     int stagetime = (FPStage.currentStage.milliSeconds + FPStage.currentStage.seconds * 100) + FPStage.currentStage.minutes * 6000;
                     if (stagetime > 0 && stagetime < (FPSaveManager.GetStageParTime(FPStage.currentStage.stageID) / 2))
                     {
-                        FPSaveManager.ForceBadgeUnlock(badgeID);
+                        BadgeHandler.UnlockBadge("kubo.spadespeedrunner");
                     }
                 }
                 //All par times
@@ -61,7 +61,7 @@ namespace PlayableSpade
                     }
                     if (parTimes >= 30)
                     {
-                        FPSaveManager.ForceBadgeUnlock(badgeID);
+                        BadgeHandler.UnlockBadge("kubo.spademaster");
                     }
                 }
             }
