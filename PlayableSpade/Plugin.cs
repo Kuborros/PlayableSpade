@@ -6,10 +6,12 @@ using System.IO;
 using FP2Lib.Badge;
 using FP2Lib.Vinyl;
 using UnityEngine;
+using FP2Lib.Player;
+using System;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.4.2")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.5.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
@@ -32,9 +34,11 @@ namespace PlayableSpade
 
             configInfiniteDash = Config.Bind("Experimental", "FP1 Air Dash", false, "Switches dash to FP1-style one.");
 
-
-            VinylHandler.RegisterVinyl("kubo.m_clear_spade","Results - Spade",moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade"),VAddToShop.Naomi);
-            VinylHandler.RegisterVinyl("kubo.m_theme_spade", "Spade's Theme", moddedBundle.LoadAsset<AudioClip>("M_Theme_Spade"), VAddToShop.Fawnstar);
+            //Initialise music
+            AudioClip spadeClear = moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade");
+            AudioClip spadeTheme = moddedBundle.LoadAsset<AudioClip>("M_Theme_Spade");
+            VinylHandler.RegisterVinyl("kubo.m_clear_spade","Results - Spade",spadeClear,VAddToShop.Naomi);
+            VinylHandler.RegisterVinyl("kubo.m_theme_spade", "Spade's Theme",spadeTheme, VAddToShop.Fawnstar);
 
             BadgeHandler.RegisterBadge("kubo.spaderunner","Red Scarf Runner", "Beat any stage's par time as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[0], FPBadgeType.SILVER);
             BadgeHandler.RegisterBadge("kubo.spadespeedrunner", "Red Scarf Speedrunner", "Beat any stage as Spade in less than half of the par time.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[1], FPBadgeType.SILVER);
@@ -42,44 +46,96 @@ namespace PlayableSpade
             BadgeHandler.RegisterBadge("kubo.spadecomplete", "The House Always Wins", "Finish the game as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[3], FPBadgeType.GOLD);
 
 
+            //Initialise map sprites
+            Sprite[] sprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("AdventureMap_Spade");
+
+            Sprite[] spadeIdle;
+            Sprite[] spadeWalk;
+
+            spadeIdle = new Sprite[7];
+
+            spadeIdle[0] = sprites[0];
+            spadeIdle[1] = sprites[1];
+            spadeIdle[2] = sprites[2];
+            spadeIdle[3] = sprites[3];
+            spadeIdle[4] = sprites[2];
+            spadeIdle[5] = sprites[1];
+            spadeIdle[6] = sprites[0];
+
+            spadeIdle[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[4].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[5].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeIdle[6].hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            spadeWalk = new Sprite[4];
+
+            spadeWalk[0] = sprites[4];
+            spadeWalk[1] = sprites[5];
+            spadeWalk[2] = sprites[6];
+            spadeWalk[3] = sprites[5];
+
+            spadeWalk[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeWalk[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeWalk[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
+            spadeWalk[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+
+            PlayableChara spadechar = new PlayableChara()
+            {
+                uid = "com.kuborro.spade",
+                Name = "Spade",
+                TutorialScene = "Tutorial1",
+                characterType = "RANGED Type",
+                skill1 = "Card Special",
+                skill2 = "Jump",
+                skill3 = "Card Throw",
+                skill4 = "Dodge Dash",
+                useOwnCutsceneActivators = false,
+                AirMoves = PatchFPPlayer.Action_Spade_AirMoves,
+                GroundMoves = PatchFPPlayer.Action_Spade_GroundMoves,
+                ItemFuelPickup = PatchFPPlayer.Action_Spade_FuelPickup,
+                eventActivatorCharacter = FPCharacterID.CAROL,
+                Gender = CharacterGender.MALE,
+                profilePic = moddedBundle.LoadAsset<Sprite>("spade_portrait"),
+                keyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
+                endingKeyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
+                charSelectName = moddedBundle.LoadAsset<Sprite>("Spade_Name"),
+                piedSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
+                piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[2],
+                itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
+                worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
+                livesIconAnim = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock"),
+                worldMapIdle = spadeIdle,
+                worldMapWalk = spadeWalk,
+                sagaBlock = moddedBundle.LoadAsset<RuntimeAnimatorController>("SagaSpade"),
+                sagaBlockSyntax = moddedBundle.LoadAsset<RuntimeAnimatorController>("Saga2Spade"),
+                resultsTrack = spadeClear,
+                endingTrack = spadeTheme,
+                menuPhotoPose = new MenuPhotoPose(),
+                characterSelectPrefab = moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade"),
+                prefab = moddedBundle.LoadAsset<GameObject>("Player Spade"),
+                dataBundle = moddedBundle
+            };
+
+            PlayerHandler.RegisterPlayableCharacterDirect(spadechar);
+
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
             harmony.PatchAll(typeof(PatchFPPlayer));
-            harmony.PatchAll(typeof(PatchItemFuel));
-            harmony.PatchAll(typeof(PatchPlayerSpawnPoint));
             harmony.PatchAll(typeof(PatchFPStage));
-            harmony.PatchAll(typeof(PatchMenuFile));
             harmony.PatchAll(typeof(PatchFPEventSequence));
-            harmony.PatchAll(typeof(PatchParentActivator));
-            harmony.PatchAll(typeof(PatchArenaRace));
-            harmony.PatchAll(typeof(PatchMenuCharacterSelect));
-            harmony.PatchAll(typeof(PatchMenuCharacterWheel));
-            harmony.PatchAll(typeof(PatchMenuTutorialPrompt));
-            harmony.PatchAll(typeof(PatchMenuGlobalPause));
-            harmony.PatchAll(typeof(PatchMenuPhoto));
-            harmony.PatchAll(typeof(PatchBFFCombiner));
-            harmony.PatchAll(typeof(PatchFPHudDigit));
-            harmony.PatchAll(typeof(PatchFPHudMaster));
-            harmony.PatchAll(typeof(PatchSBBeaconCutscene));
-            harmony.PatchAll(typeof(PatchBakunawaFusion));
             harmony.PatchAll(typeof(PatchBFFMicroMissile));
             harmony.PatchAll(typeof(PatchPlayerBFF));
             harmony.PatchAll(typeof(PatchGO3DColumn));
-            harmony.PatchAll(typeof(PatchBFWallRunZone));
-            harmony.PatchAll(typeof(PatchBSAutoscroller));
-            harmony.PatchAll(typeof(PatchArenaCameraFlash));
-            harmony.PatchAll(typeof(PatchMenuCredits));
             harmony.PatchAll(typeof(PatchLTNodePlayerBridge));
             harmony.PatchAll(typeof(PatchMenuWorldMap));
             harmony.PatchAll(typeof(PatchItemStarCard));
-            harmony.PatchAll(typeof(PatchFPBossHud));
-            harmony.PatchAll(typeof(PatchMenuWorldMapConfirm));
             harmony.PatchAll(typeof(PatchFPHubNPC));
-            harmony.PatchAll(typeof(PatchSaga));
             harmony.PatchAll(typeof(PatchAnimatorPreInitializer));
-            harmony.PatchAll(typeof(PatchAcrabellePieTrap));
             harmony.PatchAll(typeof(PatchFPSaveManager));
             harmony.PatchAll(typeof(PatchFPResultsMenu));
-            harmony.PatchAll(typeof(PatchMenuShop));
         }
     }
 }

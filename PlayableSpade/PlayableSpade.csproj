@@ -34,7 +34,7 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Freedom Planet 2\FP2_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="FP2Lib">
-      <HintPath>..\..\..\..\Desktop\Test\BepInEx\plugins\lib\FP2Lib.dll</HintPath>
+      <HintPath>..\..\FP2Lib\FP2Lib\bin\Release\net35\FP2Lib.dll</HintPath>
     </Reference>
     <Reference Include="Rewired_Core">
       <HintPath>..\..\..\..\Desktop\Test\FP2_Data\Managed\Rewired_Core.dll</HintPath>

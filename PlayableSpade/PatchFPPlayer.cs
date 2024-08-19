@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Rewired;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace PlayableSpade
         public static bool upDash;
 
         internal static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
+        internal static readonly MethodInfo m_FuelPickup = SymbolExtensions.GetMethodInfo(() => Action_Spade_FuelPickup());
         internal static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
         internal static readonly MethodInfo m_GroundMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_GroundMoves());
 
@@ -539,6 +541,13 @@ namespace PlayableSpade
             {
                 shadowTimer = 120f;
             }
+        }
+
+        internal static void Action_Spade_FuelPickup()
+        {
+            player.powerupTimer = Mathf.Max(player.powerupTimer, 600f);
+            player.flashTime = Mathf.Max(player.flashTime, 600f);
+            FPAudio.PlaySfx(sfxThrowCard);
         }
 
         public static void Action_PlaySound(AudioClip clip, float volume)
