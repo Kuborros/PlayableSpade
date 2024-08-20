@@ -736,6 +736,7 @@ namespace PlayableSpade
             Color start = new Color(0f, 1f, 0f, 1f);
             Color end = new Color(0f, 1f, 0f, 0f);
             SpriteGhost spriteGhost = (SpriteGhost)FPStage.CreateStageObject(SpriteGhost.classID, player.transform.position.x, player.transform.position.y);
+            spriteGhost.sprite.material = Plugin.moddedBundle.LoadAsset<Material>("SpadeTrail");
             spriteGhost.transform.rotation = player.transform.rotation;
             spriteGhost.SetUp(player.gameObject.GetComponent<SpriteRenderer>().sprite, start, end, 0.5f, 3f);
             spriteGhost.transform.localScale = player.transform.localScale;
