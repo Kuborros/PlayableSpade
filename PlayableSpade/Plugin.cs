@@ -45,6 +45,8 @@ namespace PlayableSpade
             BadgeHandler.RegisterBadge("kubo.spademaster", "Red Scarf Master", "Beat the par times in all stages as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[2], FPBadgeType.GOLD);
             BadgeHandler.RegisterBadge("kubo.spadecomplete", "The House Always Wins", "Finish the game as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[3], FPBadgeType.GOLD);
 
+            //Init character select sprite
+            GameObject spadeWheel = moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade");
 
             //Initialise map sprites
             Sprite[] sprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("AdventureMap_Spade");
@@ -94,6 +96,7 @@ namespace PlayableSpade
                 skill3 = "Card Throw",
                 skill4 = "Dodge Dash",
                 useOwnCutsceneActivators = false,
+                enabledInAventure = false,
                 AirMoves = PatchFPPlayer.Action_Spade_AirMoves,
                 GroundMoves = PatchFPPlayer.Action_Spade_GroundMoves,
                 ItemFuelPickup = PatchFPPlayer.Action_Spade_FuelPickup,
@@ -115,7 +118,7 @@ namespace PlayableSpade
                 resultsTrack = spadeClear,
                 endingTrack = spadeTheme,
                 menuPhotoPose = new MenuPhotoPose(),
-                characterSelectPrefab = moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade"),
+                characterSelectPrefab = spadeWheel,
                 prefab = moddedBundle.LoadAsset<GameObject>("Player Spade"),
                 dataBundle = moddedBundle
             };
