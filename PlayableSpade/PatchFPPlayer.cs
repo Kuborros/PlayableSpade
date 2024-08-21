@@ -231,7 +231,7 @@ namespace PlayableSpade
             player.superArmor = true;
             ghostTimer += FPStage.deltaTime;
 
-            if (ghostTimer >= 1f)
+            if (ghostTimer >= 2f)
             {
                 Ghost();
                 ghostTimer = 0f;
@@ -733,7 +733,7 @@ namespace PlayableSpade
 
         private static void Ghost()
         {
-            Color start = new Color(0f, 1f, 0f, 1f);
+            Color start = new Color(0f, 1f, 0f, 0.5f);
             Color end = new Color(0f, 1f, 0f, 0f);
             SpriteGhost spriteGhost = (SpriteGhost)FPStage.CreateStageObject(SpriteGhost.classID, player.transform.position.x, player.transform.position.y);
             spriteGhost.sprite.material = Plugin.moddedBundle.LoadAsset<Material>("SpadeTrail");
