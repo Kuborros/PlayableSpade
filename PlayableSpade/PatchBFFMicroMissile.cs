@@ -50,6 +50,7 @@ namespace PlayableSpade
             else return true;
         }
 
+        //REMOVE once mod package file is recompiled in modern FP2 version. Fix for 1.0.0 issue which gets transferred onto new builds.
         [HarmonyPostfix]
         [HarmonyPatch(typeof(BFFMicroMissile), "State_Done", MethodType.Normal)]
         static void PatchBFFMicroMissileDone(BFFMicroMissile __instance)
