@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.IO;
@@ -7,8 +6,6 @@ using FP2Lib.Badge;
 using FP2Lib.Vinyl;
 using UnityEngine;
 using FP2Lib.Player;
-using System;
-using UnityEngine.SceneManagement;
 
 namespace PlayableSpade
 {
@@ -17,8 +14,6 @@ namespace PlayableSpade
     {
         public static AssetBundle moddedBundle;
         public static AssetBundle tutorialScene;
-
-        public static ConfigEntry<bool> configInfiniteDash;
 
         internal static ManualLogSource logSource;
 
@@ -32,11 +27,9 @@ namespace PlayableSpade
 
             if (moddedBundle == null || tutorialScene == null)
             {
-                logSource.LogError("Failed to load AssetBundle! Mod cannot work without it, exiting. Please reinstall it.");
+                logSource.LogError("Failed to load AssetBundle! This mod cannot work without it, exiting. Please reinstall it.");
                 return;
             }
-
-            configInfiniteDash = Config.Bind("Experimental", "FP1 Air Dash", false, "Switches dash to FP1-style one.");
 
             //Initialise music
             AudioClip spadeClear = moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade");
@@ -91,6 +84,7 @@ namespace PlayableSpade
                 airshipSprite = 1,
                 useOwnCutsceneActivators = false,
                 enabledInAventure = false,
+                enabledInClassic = true,
                 AirMoves = PatchFPPlayer.Action_Spade_AirMoves,
                 GroundMoves = PatchFPPlayer.Action_Spade_GroundMoves,
                 ItemFuelPickup = PatchFPPlayer.Action_Spade_FuelPickup,
@@ -134,6 +128,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchAnimatorPreInitializer));
             harmony.PatchAll(typeof(PatchFPSaveManager));
             harmony.PatchAll(typeof(PatchFPResultsMenu));
+            harmony.PatchAll(typeof(PatchFPHudMaster));
         }
     }
 }

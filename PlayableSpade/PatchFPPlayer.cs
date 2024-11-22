@@ -230,6 +230,7 @@ namespace PlayableSpade
             player.genericTimer += FPStage.deltaTime;
             player.superArmor = true;
             ghostTimer += FPStage.deltaTime;
+            player.attackStats = new FPObjectState(AttackStats_Dash);
 
             if (ghostTimer >= 2f)
             {
@@ -312,7 +313,7 @@ namespace PlayableSpade
                     }
                 }
                 cardAngle++;
-                bffmicroMissile.attackPower = captureCardDamage;
+                bffmicroMissile.attackPower = captureCardDamage * player.GetAttackModifier();
                 bffmicroMissile.turnSpeed = 50;
                 if (FPStage.stageNameString == "Nalao Lake")
                 {
@@ -372,7 +373,7 @@ namespace PlayableSpade
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                 }
                 projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
-                projectileBasic.attackPower = 2.5f;
+                projectileBasic.attackPower = 2.5f * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
@@ -391,7 +392,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 5f;
+                    projectileBasic.attackPower = 5f * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
@@ -415,7 +416,7 @@ namespace PlayableSpade
                         shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
-                    shadowCard.attackPower = 1.75f;
+                    shadowCard.attackPower = 1.75f * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = player.direction;
@@ -434,7 +435,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 2.5f;
+                        shadowCard.attackPower = 2.5f * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
@@ -468,8 +469,10 @@ namespace PlayableSpade
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 20f;
                     projectileBasic.angle = num2;
                 }
+                
+
                 projectileBasic.animatorController = dualCardAnimator;
-                projectileBasic.attackPower = 5f;
+                projectileBasic.attackPower = 5f * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
@@ -484,7 +487,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 10f;
+                    projectileBasic.attackPower = 10f * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironDualCardAnimator;
@@ -509,7 +512,7 @@ namespace PlayableSpade
                         shadowCard.angle = num2;
                     }
                     shadowCard.animatorController = shadowDualCardAnimator;
-                    shadowCard.attackPower = 5f;
+                    shadowCard.attackPower = 5f * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = FPDirection.FACING_RIGHT;
@@ -524,7 +527,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 10f;
+                        shadowCard.attackPower = 10f * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
@@ -621,7 +624,7 @@ namespace PlayableSpade
             {
                 player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -667,7 +670,7 @@ namespace PlayableSpade
             {                
                 player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -731,6 +734,11 @@ namespace PlayableSpade
             player.Action_Jump();
         }
 
+        public static void AttackStats_Dash()
+        {
+            AttackStats_Blink(player);
+        }
+
         private static void Ghost()
         {
             Color start = new Color(0f, 1f, 0f, 0.5f);
@@ -743,6 +751,14 @@ namespace PlayableSpade
             spriteGhost.maxLifeTime = 0.5f;
             spriteGhost.growSpeed = 0f;
             spriteGhost.activationMode = FPActivationMode.ALWAYS_ACTIVE;
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "AttackStats_Blink", MethodType.Normal)]
+        public static void AttackStats_Blink(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
         }
 
         [HarmonyReversePatch]
