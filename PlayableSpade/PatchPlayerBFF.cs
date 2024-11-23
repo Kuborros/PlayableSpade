@@ -10,6 +10,11 @@ namespace PlayableSpade
         {
             PatchBFFMicroMissile.BFFActive = true;
         }
-
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerBFF2000), "State_Victory", MethodType.Normal)]
+        static void PatchBFFVictory()
+        {
+            PatchBFFMicroMissile.BFFActive = false;
+        }
     }
 }

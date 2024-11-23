@@ -1,37 +1,58 @@
-﻿using HarmonyLib;
+﻿using FP2Lib.Player;
+using HarmonyLib;
+using UnityEngine;
 
 namespace PlayableSpade
 {
     internal class PatchBFFMicroMissile
     {
+
+
+
         public static bool BFFActive = false;
+        private static RuntimeAnimatorController missileAnim;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BFFMicroMissile), "Start", MethodType.Normal)]
+        static void PatchBFFMicroMissileStart(BFFMicroMissile __instance)
+        {
+            if (missileAnim == null) missileAnim = __instance.gameObject.GetComponent<Animator>().runtimeAnimatorController;
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(BFFMicroMissile), "State_Default", MethodType.Normal)]
         static void PatchBFFMicroMissileDefault(BFFMicroMissile __instance, ref float ___speed, float ___explodeTimer)
         {
-            if (!BFFActive)
+            //Run all this only when playing as Spade
+            if (PlayerHandler.currentCharacter.id == 5)
             {
-                if ((___explodeTimer > 150f && ___explodeTimer < 175f) || (___explodeTimer > 120f && ___explodeTimer < 140f) || (___explodeTimer > 90f && ___explodeTimer < 110f) || (___explodeTimer > 60f && ___explodeTimer < 80f))
+
+                if (!BFFActive)
                 {
-                    ___speed = 0;
+                    if ((___explodeTimer > 150f && ___explodeTimer < 175f) || (___explodeTimer > 120f && ___explodeTimer < 140f) || (___explodeTimer > 90f && ___explodeTimer < 110f) || (___explodeTimer > 60f && ___explodeTimer < 80f))
+                    {
+                        ___speed = 0;
+                    }
+                    else
+                    {
+                        ___speed = 20;
+                    }
+
+                    if (__instance.target.enemy != null)
+                    {
+                        if (__instance.target.enemy.cannotBeFrozen == true)
+                        {
+                            __instance.attackPower = 1;
+                        }
+                        else __instance.attackPower = 3;
+                    }
                 }
                 else
                 {
-                    ___speed = 20;
+                    //Reset the missile into a missile - and not a card!
+                    __instance.gameObject.GetComponent<Animator>().runtimeAnimatorController = missileAnim;
+                    __instance.attackPower = 20;
                 }
-
-                if (__instance.target.enemy != null)
-                {
-                    if (__instance.target.enemy.cannotBeFrozen == true)
-                    {
-                        __instance.attackPower = 1;
-                    }
-                    else __instance.attackPower = 3;
-                }
-            }
-            else
-            {
-                __instance.attackPower = 20;
             }
         }
 

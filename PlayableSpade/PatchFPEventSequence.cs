@@ -10,7 +10,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == (FPCharacterID)5)
+            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
             {
                 //Prevent the Triple Spade Incident
                 if (__instance.transform.parent != null && FPStage.stageNameString != "Nalao Lake")
@@ -88,7 +88,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "State_Event", MethodType.Normal)]
         static void PatchStateEvent(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == (FPCharacterID)5)
+            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
             {
                 if (__instance.transform.parent != null && (FPStage.stageNameString == "Merga"))
                 {

@@ -6,6 +6,7 @@ using FP2Lib.Badge;
 using FP2Lib.Vinyl;
 using UnityEngine;
 using FP2Lib.Player;
+using BepInEx.Configuration;
 
 namespace PlayableSpade
 {
@@ -16,6 +17,9 @@ namespace PlayableSpade
         public static AssetBundle tutorialScene;
 
         internal static ManualLogSource logSource;
+        internal static ConfigEntry<bool> configDashOnDoubleJump;
+
+        internal static FPCharacterID spadeCharID;
 
         private void Awake()
         {
@@ -30,6 +34,12 @@ namespace PlayableSpade
                 logSource.LogError("Failed to load AssetBundle! This mod cannot work without it, exiting. Please reinstall it.");
                 return;
             }
+
+            //Set up config options
+             configDashOnDoubleJump = Config.Bind("Gameplay",
+                                    "DoubleJumpDash",
+                                    false,
+                                    "Rebinds the dash from Guard to pressing Jump mid-air.");
 
             //Initialise music
             AudioClip spadeClear = moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade");
@@ -47,6 +57,11 @@ namespace PlayableSpade
 
             //Init character select sprite
             GameObject spadeWheel = moddedBundle.LoadAsset<GameObject>("Menu CS Character Spade");
+            if (Random.RandomRangeInt(1, 100) == 22)
+            {
+                //Spad
+                spadeWheel = moddedBundle.LoadAsset<GameObject>("Menu CS Character Spad");
+            }
 
             //Initialise map sprites
             Sprite[] mapsprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("AdventureMap_Spade");
@@ -114,6 +129,8 @@ namespace PlayableSpade
 
             PlayerHandler.RegisterPlayableCharacterDirect(spadechar);
 
+            spadeCharID = (FPCharacterID)PlayerHandler.GetPlayableCharaByUid(spadechar.uid).id;
+
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
             harmony.PatchAll(typeof(PatchFPPlayer));
             harmony.PatchAll(typeof(PatchFPStage));
@@ -129,6 +146,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPSaveManager));
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
+            harmony.PatchAll(typeof(PatchPlayerShip));
         }
     }
 }

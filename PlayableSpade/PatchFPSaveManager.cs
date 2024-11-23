@@ -10,7 +10,7 @@ namespace PlayableSpade
         static void PatchFPSaveManagerCheckEnd()
         {
             //Spade game complete badge
-            if (FPSaveManager.character == (FPCharacterID)5)
+            if (FPSaveManager.character == Plugin.spadeCharID)
                 BadgeHandler.UnlockBadge("kubo.spadecomplete");
         }
 
@@ -19,7 +19,7 @@ namespace PlayableSpade
         static void PatchFPSaveManagerBadgeCheck(int badgeID, int variable = 0)
         {
             //Spade par time badges.
-            if (FPSaveManager.character == (FPCharacterID)5)
+            if (FPSaveManager.character == Plugin.spadeCharID)
             {
                 //Par time one stage
                 if (badgeID == BadgeHandler.GetBadgeDataByUid("kubo.spaderunner").id) 

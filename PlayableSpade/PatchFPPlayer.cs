@@ -18,7 +18,6 @@ namespace PlayableSpade
         public static RuntimeAnimatorController shadowDualCardAnimator;
         public static RuntimeAnimatorController ironDualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
-        public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
@@ -45,8 +44,7 @@ namespace PlayableSpade
         private static float captureCardDamage = 4f;
         private static int cardAngle;
 
-        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
-
+        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true }; 
 
 
         public static void Action_ResetCardAngle()
@@ -246,6 +244,52 @@ namespace PlayableSpade
                 if (player.onGround)
                 {
                     player.state = new FPObjectState(player.State_Ground);
+                }
+                else
+                {
+                    player.state = new FPObjectState(player.State_InAir);
+                }
+                return;
+            }
+        }
+
+        private static void State_Spade_GroundPound()
+        {
+            bool shockwave = false;
+            player.genericTimer += FPStage.deltaTime;
+            player.SetPlayerAnimation("GroundPoundAir");
+            player.superArmor = true;
+            ghostTimer += FPStage.deltaTime;
+            player.attackStats = new FPObjectState(AttackStats_Dash);
+
+            if (ghostTimer >= 1f)
+            {
+                Ghost();
+                ghostTimer = 0f;
+            }
+
+            player.velocity.y = -20f;
+            player.velocity.x = 0f;
+            player.Process360Movement();
+
+            if (player.onGround || player.onGrindRail)
+            {
+                player.hbAttack.enabled = false;
+                player.superArmor = false;
+                if (!shockwave)
+                {
+                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight + 12f);
+                    stingerBomb.explodeTimer = 999f;
+                    stingerBomb.faction = player.faction;
+                    shockwave = true;
+                }
+
+                dashTime += 10f;
+
+                if (player.onGround)
+                {
+                    player.SetPlayerAnimation("Crouching");
+                    player.state = new FPObjectState(player.State_Crouching);
                 }
                 else
                 {
@@ -576,6 +620,13 @@ namespace PlayableSpade
                 ghostTimer = 0;
                 player.state = new FPObjectState(State_Spade_AirDash);
             }
+            else if (player.input.down || player.input.downPress)
+            {
+                upDash = false;
+                player.genericTimer = 0;
+                ghostTimer = 0;
+                player.state = new FPObjectState(State_Spade_GroundPound);
+            }
             else if (player.direction == FPDirection.FACING_RIGHT)
             {
                 if (player.onGround)
@@ -620,11 +671,21 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
+            else if (player.input.jumpPress && !player.onGround && upDash && Plugin.configDashOnDoubleJump.Value && player.energy > 25 && dashTime <= 0f)
+            {
+                if (!player.input.down || !player.input.downPress)
+                {
+                    FPAudio.PlaySfx(15);
+                    dashTime = 40f;
+                    Action_Spade_Dash(45f);
+                    player.energy -= 25f;
+                } 
+            }
             else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down) && !Plugin.configDashOnDoubleJump.Value)
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -813,26 +874,15 @@ namespace PlayableSpade
         static void PatchPlayerStart(FPPlayer __instance)
         {
 
-            spadeAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
-            spadeAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
-            cardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
-            ironCardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             shadowCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
             shadowCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;

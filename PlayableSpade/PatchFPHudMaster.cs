@@ -13,7 +13,7 @@ namespace PlayableSpade
             string text3 = "<c=energy>Special</c>";
             string text4 = "Guard";
 
-            if (player == null || player.characterID != (FPCharacterID)5)
+            if (player == null || player.characterID != Plugin.spadeCharID)
             {
                 return;
             }
@@ -59,9 +59,14 @@ namespace PlayableSpade
                     text3 = "<c=energy>Capture Cards</c>";
                 }
             }
-            if (PatchFPPlayer.upDash)
+            if (PatchFPPlayer.upDash && !Plugin.configDashOnDoubleJump.Value)
             {
-                text4 = "<c=green>Dodge Dash</c>";
+                if (player.input.down || player.input.downPress)
+                {
+                    text4 = "Ground Pound";
+                } 
+                else
+                    text4 = "Dodge Dash";
             }
 
             if (player.displayMoveJump != string.Empty)
