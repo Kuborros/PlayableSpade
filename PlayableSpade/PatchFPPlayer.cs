@@ -620,7 +620,7 @@ namespace PlayableSpade
                 ghostTimer = 0;
                 player.state = new FPObjectState(State_Spade_AirDash);
             }
-            else if (player.input.down || player.input.downPress)
+            else if ((player.input.down || player.input.downPress) && !(player.onGrindRail || player.onGround))
             {
                 upDash = false;
                 player.genericTimer = 0;
