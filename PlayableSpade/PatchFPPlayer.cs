@@ -278,7 +278,7 @@ namespace PlayableSpade
                 player.superArmor = false;
                 if (!shockwave && player.onGround)
                 {
-                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight + 12f);
+                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight);
                     stingerBomb.explodeTimer = 999f;
                     stingerBomb.faction = player.faction;
                     shockwave = true;
