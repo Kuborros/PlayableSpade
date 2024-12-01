@@ -272,11 +272,11 @@ namespace PlayableSpade
             player.velocity.x = 0f;
             player.Process360Movement();
 
-            if (player.onGround || player.onGrindRail)
+            if (player.onGround || player.onGrindRail || player.genericTimer >= 100f)
             {
                 player.hbAttack.enabled = false;
                 player.superArmor = false;
-                if (!shockwave)
+                if (!shockwave && player.onGround)
                 {
                     StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight + 12f);
                     stingerBomb.explodeTimer = 999f;
