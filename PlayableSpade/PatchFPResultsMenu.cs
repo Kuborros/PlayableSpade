@@ -9,7 +9,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPResultsMenu), "Update", MethodType.Normal)]
         private static void PatchResultsUpdate(float ___badgeCheckTimer)
         {
-            if (___badgeCheckTimer < 61f && !FPStage.currentStage.disableBadgeChecks && FPSaveManager.character == (FPCharacterID)5)
+            if (___badgeCheckTimer < 61f && !FPStage.currentStage.disableBadgeChecks && FPSaveManager.character == Plugin.spadeCharID)
             {
                 if ((___badgeCheckTimer + FPStage.deltaTime) >= 60f)
                 {
@@ -19,6 +19,5 @@ namespace PlayableSpade
                 }
             }
         }
-
     }
 }

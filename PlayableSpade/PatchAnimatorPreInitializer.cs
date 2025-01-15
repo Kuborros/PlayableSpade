@@ -1,8 +1,4 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -31,7 +27,5 @@ namespace PlayableSpade
 
             ___animatorsToInit = ___animatorsToInit.AddToArray(spadeInit);
         }
-
-
     }
 }

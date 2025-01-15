@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Rewired;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace PlayableSpade
         public static RuntimeAnimatorController shadowDualCardAnimator;
         public static RuntimeAnimatorController ironDualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
-        public static RuntimeAnimatorController spadeAnimator;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
@@ -25,6 +25,7 @@ namespace PlayableSpade
         public static bool upDash;
 
         internal static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
+        internal static readonly MethodInfo m_FuelPickup = SymbolExtensions.GetMethodInfo(() => Action_Spade_FuelPickup());
         internal static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
         internal static readonly MethodInfo m_GroundMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_GroundMoves());
 
@@ -43,8 +44,7 @@ namespace PlayableSpade
         private static float captureCardDamage = 4f;
         private static int cardAngle;
 
-        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
-
+        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true }; 
 
 
         public static void Action_ResetCardAngle()
@@ -228,8 +228,9 @@ namespace PlayableSpade
             player.genericTimer += FPStage.deltaTime;
             player.superArmor = true;
             ghostTimer += FPStage.deltaTime;
+            player.attackStats = new FPObjectState(AttackStats_Dash);
 
-            if (ghostTimer >= 1f)
+            if (ghostTimer >= 2f)
             {
                 Ghost();
                 ghostTimer = 0f;
@@ -243,6 +244,52 @@ namespace PlayableSpade
                 if (player.onGround)
                 {
                     player.state = new FPObjectState(player.State_Ground);
+                }
+                else
+                {
+                    player.state = new FPObjectState(player.State_InAir);
+                }
+                return;
+            }
+        }
+
+        private static void State_Spade_GroundPound()
+        {
+            bool shockwave = false;
+            player.genericTimer += FPStage.deltaTime;
+            player.SetPlayerAnimation("GroundPoundAir");
+            player.superArmor = true;
+            ghostTimer += FPStage.deltaTime;
+            player.attackStats = new FPObjectState(AttackStats_Dash);
+
+            if (ghostTimer >= 1f)
+            {
+                Ghost();
+                ghostTimer = 0f;
+            }
+
+            player.velocity.y = -20f;
+            player.velocity.x = 0f;
+            player.Process360Movement();
+
+            if (player.onGround || player.onGrindRail || player.genericTimer >= 100f)
+            {
+                player.hbAttack.enabled = false;
+                player.superArmor = false;
+                if (!shockwave && player.onGround)
+                {
+                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight);
+                    stingerBomb.explodeTimer = 999f;
+                    stingerBomb.faction = player.faction;
+                    shockwave = true;
+                }
+
+                dashTime += 10f;
+
+                if (player.onGround)
+                {
+                    player.SetPlayerAnimation("Crouching");
+                    player.state = new FPObjectState(player.State_Crouching);
                 }
                 else
                 {
@@ -310,7 +357,7 @@ namespace PlayableSpade
                     }
                 }
                 cardAngle++;
-                bffmicroMissile.attackPower = captureCardDamage;
+                bffmicroMissile.attackPower = captureCardDamage * player.GetAttackModifier();
                 bffmicroMissile.turnSpeed = 50;
                 if (FPStage.stageNameString == "Nalao Lake")
                 {
@@ -370,7 +417,7 @@ namespace PlayableSpade
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                 }
                 projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
-                projectileBasic.attackPower = 2.5f;
+                projectileBasic.attackPower = 2.5f * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
@@ -389,7 +436,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 5f;
+                    projectileBasic.attackPower = 5f * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
@@ -413,7 +460,7 @@ namespace PlayableSpade
                         shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
-                    shadowCard.attackPower = 1.75f;
+                    shadowCard.attackPower = 1.75f * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = player.direction;
@@ -432,7 +479,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 2.5f;
+                        shadowCard.attackPower = 2.5f * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
@@ -466,8 +513,10 @@ namespace PlayableSpade
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 20f;
                     projectileBasic.angle = num2;
                 }
+                
+
                 projectileBasic.animatorController = dualCardAnimator;
-                projectileBasic.attackPower = 5f;
+                projectileBasic.attackPower = 5f * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
@@ -482,7 +531,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 10f;
+                    projectileBasic.attackPower = 10f * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironDualCardAnimator;
@@ -507,7 +556,7 @@ namespace PlayableSpade
                         shadowCard.angle = num2;
                     }
                     shadowCard.animatorController = shadowDualCardAnimator;
-                    shadowCard.attackPower = 5f;
+                    shadowCard.attackPower = 5f * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = FPDirection.FACING_RIGHT;
@@ -522,7 +571,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 10f;
+                        shadowCard.attackPower = 10f * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
@@ -539,6 +588,13 @@ namespace PlayableSpade
             {
                 shadowTimer = 120f;
             }
+        }
+
+        internal static void Action_Spade_FuelPickup()
+        {
+            player.powerupTimer = Mathf.Max(player.powerupTimer, 600f);
+            player.flashTime = Mathf.Max(player.flashTime, 600f);
+            FPAudio.PlaySfx(sfxThrowCard);
         }
 
         public static void Action_PlaySound(AudioClip clip, float volume)
@@ -563,6 +619,13 @@ namespace PlayableSpade
                 player.genericTimer = 0;
                 ghostTimer = 0;
                 player.state = new FPObjectState(State_Spade_AirDash);
+            }
+            else if ((player.input.down || player.input.downPress) && !(player.onGrindRail || player.onGround))
+            {
+                upDash = false;
+                player.genericTimer = 0;
+                ghostTimer = 0;
+                player.state = new FPObjectState(State_Spade_GroundPound);
             }
             else if (player.direction == FPDirection.FACING_RIGHT)
             {
@@ -608,11 +671,21 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
+            else if (player.input.jumpPress && !player.onGround && upDash && Plugin.configDashOnDoubleJump.Value && player.energy > 25 && dashTime <= 0f)
+            {
+                if (!player.input.down || !player.input.downPress)
+                {
+                    FPAudio.PlaySfx(15);
+                    dashTime = 40f;
+                    Action_Spade_Dash(45f);
+                    player.energy -= 25f;
+                } 
+            }
             else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
             {
                 player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down) && !Plugin.configDashOnDoubleJump.Value)
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -658,7 +731,7 @@ namespace PlayableSpade
             {                
                 player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && (upDash || Plugin.configInfiniteDash.Value) && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -722,17 +795,31 @@ namespace PlayableSpade
             player.Action_Jump();
         }
 
+        public static void AttackStats_Dash()
+        {
+            AttackStats_Blink(player);
+        }
+
         private static void Ghost()
         {
-            Color start = new Color(0f, 1f, 0f, 1f);
+            Color start = new Color(0f, 1f, 0f, 0.5f);
             Color end = new Color(0f, 1f, 0f, 0f);
             SpriteGhost spriteGhost = (SpriteGhost)FPStage.CreateStageObject(SpriteGhost.classID, player.transform.position.x, player.transform.position.y);
+            spriteGhost.sprite.material = Plugin.moddedBundle.LoadAsset<Material>("SpadeTrail");
             spriteGhost.transform.rotation = player.transform.rotation;
             spriteGhost.SetUp(player.gameObject.GetComponent<SpriteRenderer>().sprite, start, end, 0.5f, 3f);
             spriteGhost.transform.localScale = player.transform.localScale;
             spriteGhost.maxLifeTime = 0.5f;
             spriteGhost.growSpeed = 0f;
             spriteGhost.activationMode = FPActivationMode.ALWAYS_ACTIVE;
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "AttackStats_Blink", MethodType.Normal)]
+        public static void AttackStats_Blink(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
         }
 
         [HarmonyReversePatch]
@@ -787,26 +874,15 @@ namespace PlayableSpade
         static void PatchPlayerStart(FPPlayer __instance)
         {
 
-            spadeAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
-            spadeAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
             cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
-            cardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            cardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
             ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
-            ironCardAnimator[0].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[1].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[2].hideFlags = HideFlags.DontUnloadUnusedAsset;
-            ironCardAnimator[3].hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             shadowCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
             shadowCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
@@ -849,145 +925,6 @@ namespace PlayableSpade
                 autoGuard = true;
             }
         }
-        
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "AutoGuard", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerHurtTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-            Label groundStart = il.DefineLabel();
-            Label groundEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(groundStart).ToArray();
-                    codes[i].operand = targets;
-                    groundEnd = (Label)codes[i + 1].operand;
-                    break;
-                }
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            CodeInstruction groundCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            groundCodeStart.labels.Add(groundStart);
-
-            codes.Add(groundCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_GroundMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, groundEnd));
-
-
-            return codes;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_Crouching", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerCrouchTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label groundStart = il.DefineLabel();
-            Label groundEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(groundStart).ToArray();
-                    codes[i].operand = targets;
-                    groundEnd = (Label)codes[i + 1].operand;
-                    break;
-                }
-            }
-
-            CodeInstruction groundCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            groundCodeStart.labels.Add(groundStart);
-
-            codes.Add(groundCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_GroundMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, groundEnd));
-
-
-            return codes;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_LookUp", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerLookUpTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label groundStart = il.DefineLabel();
-            Label groundEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(groundStart).ToArray();
-                    codes[i].operand = targets;
-                    groundEnd = (Label)codes[i + 1].operand;
-                    break;
-                }
-            }
-
-            CodeInstruction groundCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            groundCodeStart.labels.Add(groundStart);
-
-            codes.Add(groundCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_GroundMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, groundEnd));
-
-
-            return codes;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_Ground", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerGroundTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label groundStart = il.DefineLabel();
-            Label groundEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_S)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(groundStart).ToArray();
-                    codes[i].operand = targets;
-                    groundEnd = (Label)codes[i + 1].operand;
-                    break;
-                }
-            }
-
-            CodeInstruction groundCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            groundCodeStart.labels.Add(groundStart);
-
-            codes.Add(groundCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_GroundMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, groundEnd));
-
-
-            return codes;
-        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "State_InAir", MethodType.Normal)]
@@ -999,98 +936,11 @@ namespace PlayableSpade
             }
         }
 
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_InAir", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerAirTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_2)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            return codes;
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "State_Hanging", MethodType.Normal)]
         static void PatchPlayerHang()
         {
             upDash = true;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_Hanging", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerHangTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_S)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            return codes;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_LadderClimb", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerLadderTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_0)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            return codes;
         }
 
         [HarmonyPostfix]
@@ -1100,35 +950,6 @@ namespace PlayableSpade
             upDash = true;
         }
 
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_Swimming", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerSwimTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            return codes;
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "State_GrindRail", MethodType.Normal)]
         [HarmonyPatch(typeof(FPPlayer), "PseudoGrindRail", MethodType.Normal)]
@@ -1136,36 +957,5 @@ namespace PlayableSpade
         {
             upDash = true;
         }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPPlayer), "State_GrindRail", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> PlayerGrindTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label airStart = il.DefineLabel();
-            Label airEnd = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && (codes[i - 1].opcode == OpCodes.Ldloc_2))
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    targets = targets.AddItem(airStart).ToArray();
-                    codes[i].operand = targets;
-                    airEnd = (Label)codes[i + 1].operand;
-                }
-
-            }
-            CodeInstruction airCodeStart = new CodeInstruction(OpCodes.Ldarg_0);
-            airCodeStart.labels.Add(airStart);
-
-            codes.Add(airCodeStart);
-            codes.Add(new CodeInstruction(OpCodes.Call, m_Jump));
-            codes.Add(new CodeInstruction(OpCodes.Call, m_AirMoves));
-            codes.Add(new CodeInstruction(OpCodes.Br, airEnd));
-
-            return codes;
-        }
-
     }
 }

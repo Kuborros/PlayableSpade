@@ -1,46 +1,101 @@
 ﻿using HarmonyLib;
-using System.Linq;
-using UnityEngine;
 
 namespace PlayableSpade
 {
     internal class PatchFPHudMaster
     {
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(FPHudMaster), "Start", MethodType.Normal)]
-        static void PatchHudMasterStart(ref FPHudDigit ___hudRevive)
+        [HarmonyPatch(typeof(FPHudMaster), "GuideUpdate", MethodType.Normal)]
+        static void PatchGuideUpdate(FPPlayer player, FPHudMaster __instance)
         {
-            if (___hudRevive.gameObject.GetComponents<FPHudDigit>().Length != 0)
+            string text = "Jump";
+            string text2 = "Card Throw";
+            string text3 = "<c=energy>Special</c>";
+            string text4 = "Guard";
+
+            if (player == null || player.characterID != Plugin.spadeCharID)
             {
-                foreach (FPHudDigit digit in ___hudRevive.gameObject.GetComponentsInChildren<FPHudDigit>())
+                return;
+            }
+            if (player.IsKOd(false))
+            {
+                text = "-";
+                text2 = "-";
+                text3 = "-";
+                text4 = "-";
+            }
+
+            //Mid-air
+            if (!player.onGround && player.state != new FPObjectState(player.State_LadderClimb))
+            {
+                //No double-jump for Spade
+                text = "-";
+                if (player.state != new FPObjectState(player.State_Ball) && player.state != new FPObjectState(player.State_Ball_Physics) && player.state != new FPObjectState(player.State_Ball_Vulnerable))
                 {
-                    if (digit.name == "Hud Life Icon" && digit.digitFrames.Length <= 6)
+                    text3 = "<c=energy>Power Cards</c>";
+                }
+            }
+
+            //On the ground, excluding funky states
+            if (player.state != new FPObjectState(player.State_LadderClimb) && player.state != new FPObjectState(player.State_Ball) && player.state != new FPObjectState(player.State_Ball_Physics) && player.state != new FPObjectState(player.State_Ball_Vulnerable))
+            {
+                if (player.input.down && !player.input.up)
+                {
+                    if (player.state == new FPObjectState(player.State_Crouching) || (player.onGround && player.groundVel == 0f))
                     {
-                        Sprite[] spadStock = Plugin.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock");
-                        digit.digitFrames = digit.digitFrames.AddItem(digit.digitFrames[5]).ToArray();
-                        digit.digitFrames[5] = spadStock[0];
+                        text2 = "Sneak Throw";
+                    }
+                    else
+                    {
+                        text2 = "Downwards Throw";
                     }
                 }
-            }
-        }
-
-            [HarmonyPrefix]
-        [HarmonyPatch(typeof(FPHudMaster), "LateUpdate", MethodType.Normal)]
-        static void PatchHudMasterLateUpdate(FPHudMaster __instance, FPHudDigit[] ___hudLifeIcon, float ___lifeIconBlinkTimer)
-        {
-            if (__instance.targetPlayer.characterID == (FPCharacterID)5)
-            {
-                if (___hudLifeIcon[0].digitFrames.Length < 16)
+                if (player.input.up && !player.input.down)
                 {
-                    Sprite[] spadStock = Plugin.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock");
-
-                    ___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(spadStock[0]);
-                    ___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(spadStock[1]);
-                    ___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(spadStock[2]);
-                    ___hudLifeIcon[0].digitFrames = ___hudLifeIcon[0].digitFrames.AddToArray(spadStock[1]);
+                    text2 = "Upwards Throw";
                 }
-                ___hudLifeIcon[0].SetDigitValue(Mathf.Max(15, 15 + (int)___lifeIconBlinkTimer % 3));
+                if (player.onGround)
+                {
+                    text3 = "<c=energy>Capture Cards</c>";
+                }
             }
+            if (PatchFPPlayer.upDash && !Plugin.configDashOnDoubleJump.Value)
+            {
+                if (player.input.down || player.input.downPress)
+                {
+                    text4 = "Ground Pound";
+                } 
+                else
+                    text4 = "Dodge Dash";
+            }
+
+            if (player.displayMoveJump != string.Empty)
+            {
+                text = player.displayMoveJump;
+            }
+            if (player.displayMoveAttack != string.Empty)
+            {
+                text2 = player.displayMoveAttack;
+            }
+            if (player.displayMoveSpecial != string.Empty)
+            {
+                text3 = player.displayMoveSpecial;
+            }
+            if (player.displayMoveGuard != string.Empty)
+            {
+                text4 = player.displayMoveGuard;
+            }
+            __instance.hudGuide.text = string.Concat(new string[]
+            {
+            text,
+            "\n",
+            text2,
+            "\n",
+            text3,
+            "\n",
+            text4,
+            "\n "
+            });
         }
     }
 }

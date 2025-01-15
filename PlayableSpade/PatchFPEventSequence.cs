@@ -1,7 +1,4 @@
 ﻿using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -13,8 +10,9 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == (FPCharacterID)5)
+            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
             {
+                //Prevent the Triple Spade Incident
                 if (__instance.transform.parent != null && FPStage.stageNameString != "Nalao Lake")
                 {
                     Transform cutsceneCarol = __instance.transform.parent.gameObject.transform.Find("Cutscene_Carol");
@@ -27,6 +25,8 @@ namespace PlayableSpade
                         }
                     }
                 }
+
+                //Post-Merga fight special case
                 if (__instance.transform.parent != null && FPStage.stageNameString == "Merga")
                 {
                     Transform eventSequence = __instance.transform.parent.gameObject.transform;
@@ -43,7 +43,9 @@ namespace PlayableSpade
                         }
                     }
                 }
-                if (__instance.transform.Find("Cutscene_Carol_Classic") != null) //Snowfields magic
+
+                //Snowfields magic
+                if (__instance.transform.Find("Cutscene_Carol_Classic") != null)
                 {
                     Transform cutsceneCarolClassic = __instance.transform.Find("Cutscene_Carol_Classic");
                     if (cutsceneCarolClassic != null)
@@ -55,6 +57,8 @@ namespace PlayableSpade
                         }
                     }
                 }
+
+                //For Sigwada, we need to use Lilac's cutscene instead - Carol lacks the needed ones, since she skips the Cory fight
                 if (__instance.transform.parent != null && FPStage.stageNameString == "Airship Sigwada")
                 {
                     if (__instance.lilac) __instance.carol = true;
@@ -77,11 +81,14 @@ namespace PlayableSpade
             }
         }
 
+
+        //Special ending cutscene skipping code. These cutscenes do not have classic equivalents and still include dialogue - thus would mess immersion up.
+        //Consider asking Spade's VA to voice a line for this. To anyone reading this - NO, AI Voice will *not* be even considered.
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPEventSequence), "State_Event", MethodType.Normal)]
         static void PatchStateEvent(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == (FPCharacterID)5)
+            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
             {
                 if (__instance.transform.parent != null && (FPStage.stageNameString == "Merga"))
                 {
@@ -105,66 +112,5 @@ namespace PlayableSpade
                 }
             }
         }
-
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> EventSequenceStartTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label carolCheck = il.DefineLabel();
-
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_S)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    codes[i + 8].labels.Add(carolCheck);
-                    targets = targets.AddItem(carolCheck).ToArray();
-                    codes[i].operand = targets;
-                    break;
-                }
-            }
-            return codes;
-        }
-
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPEventSequence), "State_Default", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> EventSequenceDefaultTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label carolCheck = il.DefineLabel();
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && (codes[i - 1].opcode == OpCodes.Ldloc_2 || codes[i - 1].opcode == OpCodes.Ldloc_S))
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    codes[i + 8].labels.Add(carolCheck);
-                    targets = targets.AddItem(carolCheck).ToArray();
-                    codes[i].operand = targets;
-                }
-            }
-            return codes;
-        }
-        [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FPEventSequence), "State_Event", MethodType.Normal)]
-        static IEnumerable<CodeInstruction> EventSequenceEventTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            Label carolCheck = il.DefineLabel();
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            for (var i = 1; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Switch && codes[i - 1].opcode == OpCodes.Ldloc_1)
-                {
-                    Label[] targets = (Label[])codes[i].operand;
-                    codes[i + 8].labels.Add(carolCheck);
-                    targets = targets.AddItem(carolCheck).ToArray();
-                    codes[i].operand = targets;
-                    break;
-                }
-            }
-            return codes;
-        }
-
     }
 }
