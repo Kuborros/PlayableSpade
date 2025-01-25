@@ -1,10 +1,8 @@
 ﻿using HarmonyLib;
-using Rewired;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace PlayableSpade
@@ -37,6 +35,9 @@ namespace PlayableSpade
         protected static float ghostTimer = 0f;
         protected static float shadowTimer = 0f;
         protected static float dashTime = 0f;
+
+        private static float cardDamage = 2f;
+        private static float crashCardDamage = 2.5f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static int captureCardCount = 3;
@@ -201,11 +202,11 @@ namespace PlayableSpade
                 player.angle = 0f;
                 if (player.direction == FPDirection.FACING_LEFT)
                 {
-                    player.velocity.x = Mathf.Min(player.velocity.x + player.acceleration * FPStage.deltaTime, 7f);
+                    player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + player.acceleration * FPStage.deltaTime, 7f), 100f);
                 }
                 else
                 {
-                    player.velocity.x = Mathf.Max(player.velocity.x - player.acceleration * FPStage.deltaTime, -7f);
+                    player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - player.acceleration * FPStage.deltaTime, -7f), -100f);
                 }
                 if (player.energy <= 1f || !player.input.specialHold)
                 {
@@ -417,7 +418,7 @@ namespace PlayableSpade
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                 }
                 projectileBasic.animatorController = cardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
-                projectileBasic.attackPower = 2.5f * player.GetAttackModifier();
+                projectileBasic.attackPower = cardDamage * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = player.direction;
@@ -436,7 +437,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 5f * player.GetAttackModifier();
+                    projectileBasic.attackPower = (cardDamage * 2) * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
@@ -460,7 +461,7 @@ namespace PlayableSpade
                         shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
-                    shadowCard.attackPower = 1.75f * player.GetAttackModifier();
+                    shadowCard.attackPower = (cardDamage / 2 ) * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = player.direction;
@@ -479,7 +480,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 2.5f * player.GetAttackModifier();
+                        shadowCard.attackPower = cardDamage * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
@@ -516,7 +517,7 @@ namespace PlayableSpade
                 
 
                 projectileBasic.animatorController = dualCardAnimator;
-                projectileBasic.attackPower = 5f * player.GetAttackModifier();
+                projectileBasic.attackPower = crashCardDamage * player.GetAttackModifier();
                 projectileBasic.animator = projectileBasic.GetComponent<Animator>();
                 projectileBasic.animator.runtimeAnimatorController = projectileBasic.animatorController;
                 projectileBasic.direction = FPDirection.FACING_RIGHT;
@@ -531,7 +532,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = 10f * player.GetAttackModifier();
+                    projectileBasic.attackPower = (crashCardDamage * 2) * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironDualCardAnimator;
@@ -556,7 +557,7 @@ namespace PlayableSpade
                         shadowCard.angle = num2;
                     }
                     shadowCard.animatorController = shadowDualCardAnimator;
-                    shadowCard.attackPower = 5f * player.GetAttackModifier();
+                    shadowCard.attackPower = (crashCardDamage / 2) * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = FPDirection.FACING_RIGHT;
@@ -571,7 +572,7 @@ namespace PlayableSpade
                     shadowCard.hbTouch = cardHitbox;
                     if (player.powerupTimer > 0)
                     {
-                        shadowCard.attackPower = 10f * player.GetAttackModifier();
+                        shadowCard.attackPower = crashCardDamage * player.GetAttackModifier();
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
