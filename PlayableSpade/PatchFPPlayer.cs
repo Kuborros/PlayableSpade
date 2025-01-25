@@ -36,8 +36,8 @@ namespace PlayableSpade
         protected static float shadowTimer = 0f;
         protected static float dashTime = 0f;
 
-        private static float cardDamage = 2f;
-        private static float crashCardDamage = 2.5f;
+        private static float cardDamage = 1.5f;
+        private static float crashCardDamage = 2f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static int captureCardCount = 3;
@@ -202,11 +202,11 @@ namespace PlayableSpade
                 player.angle = 0f;
                 if (player.direction == FPDirection.FACING_LEFT)
                 {
-                    player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + player.acceleration * FPStage.deltaTime, 7f), 100f);
+                    player.velocity.x = Mathf.Clamp(Mathf.Min(player.velocity.x + player.acceleration * FPStage.deltaTime, 7f), -10f, 10f);
                 }
                 else
                 {
-                    player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - player.acceleration * FPStage.deltaTime, -7f), -100f);
+                    player.velocity.x = Mathf.Clamp(Mathf.Max(player.velocity.x - player.acceleration * FPStage.deltaTime, -7f), -10f, 10f);
                 }
                 if (player.energy <= 1f || !player.input.specialHold)
                 {

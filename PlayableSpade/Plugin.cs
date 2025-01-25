@@ -10,7 +10,7 @@ using BepInEx.Configuration;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.5.0")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.5.1")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class Plugin : BaseUnityPlugin
     {
