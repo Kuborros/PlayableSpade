@@ -12,7 +12,7 @@ namespace PlayableSpade
         {
             if (___NPCName == "Ying")
             {
-                GameObject spad = Plugin.moddedBundle.LoadAsset<GameObject>("SketchMenuSpad");
+                GameObject spad = PlayableSpade.moddedBundle.LoadAsset<GameObject>("SketchMenuSpad");
                 ___shopMenu = ___shopMenu.AddToArray(spad);
 
                 NPCDialog spadoodleDialog = ___dialog[1];

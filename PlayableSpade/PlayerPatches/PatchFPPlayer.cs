@@ -672,7 +672,7 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_DualCrash);
                 }
             }
-            else if (player.input.jumpPress && !player.onGround && upDash && Plugin.configDashOnDoubleJump.Value && player.energy > 25 && dashTime <= 0f)
+            else if (player.input.jumpPress && !player.onGround && upDash && PlayableSpade.configDashOnDoubleJump.Value && player.energy > 25 && dashTime <= 0f)
             {
                 if (!player.input.down || !player.input.downPress)
                 {
@@ -686,7 +686,7 @@ namespace PlayableSpade
             {
                 player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down) && !Plugin.configDashOnDoubleJump.Value)
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down) && !PlayableSpade.configDashOnDoubleJump.Value)
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
@@ -806,7 +806,7 @@ namespace PlayableSpade
             Color start = new Color(0f, 1f, 0f, 0.5f);
             Color end = new Color(0f, 1f, 0f, 0f);
             SpriteGhost spriteGhost = (SpriteGhost)FPStage.CreateStageObject(SpriteGhost.classID, player.transform.position.x, player.transform.position.y);
-            spriteGhost.sprite.material = Plugin.moddedBundle.LoadAsset<Material>("SpadeTrail");
+            spriteGhost.sprite.material = PlayableSpade.moddedBundle.LoadAsset<Material>("SpadeTrail");
             spriteGhost.transform.rotation = player.transform.rotation;
             spriteGhost.SetUp(player.gameObject.GetComponent<SpriteRenderer>().sprite, start, end, 0.5f, 3f);
             spriteGhost.transform.localScale = player.transform.localScale;
@@ -875,37 +875,37 @@ namespace PlayableSpade
         static void PatchPlayerStart(FPPlayer __instance)
         {
 
-            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
-            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
-            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
-            cardAnimator = cardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
+            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
+            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
+            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
+            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
 
-            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
+            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
 
-            shadowCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
+            shadowCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
             shadowCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            dualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
+            dualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
             dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            ironDualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
+            ironDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
             ironDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            shadowDualCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
+            shadowDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
             shadowDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            captureCardAnimator = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
+            captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
             captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            sfxThrowCard = Plugin.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
-            sfxThrowDualCard = Plugin.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
+            sfxThrowCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
+            sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
-            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("DashGhost"));
+            GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
 
-            GameObject.Instantiate(Plugin.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
+            GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
 
             player = __instance;
             upDash = true;

@@ -9,7 +9,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(MenuWorldMap), "State_Default", MethodType.Normal)]
         private static void PatchStateDefault(bool ___cutsceneCheck, float ___badgeCheckTimer)
         {
-            if (___cutsceneCheck && ___badgeCheckTimer > 0f && ___badgeCheckTimer < 26f && FPSaveManager.character == Plugin.spadeCharID)
+            if (___cutsceneCheck && ___badgeCheckTimer > 0f && ___badgeCheckTimer < 26f && FPSaveManager.character == PlayableSpade.spadeCharID)
             {
                 if ((___badgeCheckTimer + FPStage.deltaTime) >= 25f)
                 {

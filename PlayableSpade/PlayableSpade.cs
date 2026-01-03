@@ -7,12 +7,13 @@ using FP2Lib.Vinyl;
 using UnityEngine;
 using FP2Lib.Player;
 using BepInEx.Configuration;
+using PlayableSpade.BossPatches;
 
 namespace PlayableSpade
 {
     [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.5.1")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
-    public class Plugin : BaseUnityPlugin
+    public class PlayableSpade : BaseUnityPlugin
     {
         public static AssetBundle moddedBundle;
         public static AssetBundle tutorialScene;
@@ -87,6 +88,9 @@ namespace PlayableSpade
             spadeWalk[2] = mapsprites[6];
             spadeWalk[3] = mapsprites[5];
 
+            //Load the PlayerBoss version of Spade
+            GameObject bossSpade = moddedBundle.LoadAsset<GameObject>("Boss Spade");
+
             PlayableChara spadechar = new PlayableChara()
             {
                 uid = "com.kuborro.spade",
@@ -124,6 +128,7 @@ namespace PlayableSpade
                 endingTrack = spadeTheme,
                 menuPhotoPose = new MenuPhotoPose(),
                 characterSelectPrefab = spadeWheel,
+                playerBoss = bossSpade.GetComponent<PlayerBossSpade>(),
                 prefab = moddedBundle.LoadAsset<GameObject>("Player Spade"),
                 dataBundle = moddedBundle
             };
@@ -133,6 +138,7 @@ namespace PlayableSpade
             spadeCharID = (FPCharacterID)PlayerHandler.GetPlayableCharaByUid(spadechar.uid).id;
 
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
+
             harmony.PatchAll(typeof(PatchFPPlayer));
             harmony.PatchAll(typeof(PatchFPStage));
             harmony.PatchAll(typeof(PatchFPEventSequence));
@@ -148,6 +154,8 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
             harmony.PatchAll(typeof(PatchPlayerShip));
+
+            harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }
     }
 }

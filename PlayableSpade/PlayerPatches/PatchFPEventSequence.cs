@@ -10,7 +10,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "Start", MethodType.Normal)]
         static void PatchStateDefault(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
+            if (__instance != null && FPSaveManager.character == PlayableSpade.spadeCharID)
             {
                 //Prevent the Triple Spade Incident
                 if (__instance.transform.parent != null && FPStage.stageNameString != "Nalao Lake")
@@ -20,7 +20,7 @@ namespace PlayableSpade
                     {
                         if (cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
                         {
-                            cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                            cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
                             cutsceneCarol.Find("tail").gameObject.SetActive(false);
                         }
                     }
@@ -37,7 +37,7 @@ namespace PlayableSpade
                         {
                             if (cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
                             {
-                                cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                                cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
                                 cutsceneCarol.Find("tail").gameObject.SetActive(false);
                             }
                         }
@@ -52,7 +52,7 @@ namespace PlayableSpade
                     {
                         if (cutsceneCarolClassic.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
                         {
-                            cutsceneCarolClassic.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                            cutsceneCarolClassic.gameObject.GetComponent<Animator>().runtimeAnimatorController = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
                             cutsceneCarolClassic.Find("tail").gameObject.SetActive(false);
                         }
                     }
@@ -71,7 +71,7 @@ namespace PlayableSpade
                         {
                             if (cutsceneLilac.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
                             {
-                                cutsceneLilac.gameObject.GetComponent<Animator>().runtimeAnimatorController = Plugin.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                                cutsceneLilac.gameObject.GetComponent<Animator>().runtimeAnimatorController = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
                                 cutsceneLilac.Find("tail").gameObject.SetActive(false);
                             }
                         }
@@ -88,7 +88,7 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPEventSequence), "State_Event", MethodType.Normal)]
         static void PatchStateEvent(FPEventSequence __instance)
         {
-            if (__instance != null && FPSaveManager.character == Plugin.spadeCharID)
+            if (__instance != null && FPSaveManager.character == PlayableSpade.spadeCharID)
             {
                 if (__instance.transform.parent != null && (FPStage.stageNameString == "Merga"))
                 {
