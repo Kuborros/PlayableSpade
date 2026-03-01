@@ -8,10 +8,11 @@ using UnityEngine;
 using FP2Lib.Player;
 using BepInEx.Configuration;
 using PlayableSpade.BossPatches;
+using PlayableSpade.PlayerPatches;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.5.1")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.6.0")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
@@ -114,8 +115,8 @@ namespace PlayableSpade
                 keyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
                 endingKeyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
                 charSelectName = moddedBundle.LoadAsset<Sprite>("Spade_Name"),
-                piedSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
-                piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[2],
+                piedSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[0],
+                piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
                 itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
                 worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
                 zaoBaseballSprite = moddedBundle.LoadAsset<Sprite>("SpadeZLBall"),
@@ -154,6 +155,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
             harmony.PatchAll(typeof(PatchPlayerShip));
+            harmony.PatchAll(typeof(PatchBFSyntaxHunt));
 
             harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }
