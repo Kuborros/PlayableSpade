@@ -8,7 +8,6 @@ using UnityEngine;
 using FP2Lib.Player;
 using BepInEx.Configuration;
 using PlayableSpade.BossPatches;
-using PlayableSpade.PlayerPatches;
 
 namespace PlayableSpade
 {
@@ -119,6 +118,7 @@ namespace PlayableSpade
                 piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
                 itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
                 worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
+                bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7],
                 zaoBaseballSprite = moddedBundle.LoadAsset<Sprite>("SpadeZLBall"),
                 livesIconAnim = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock"),
                 worldMapIdle = spadeIdle,
@@ -155,7 +155,6 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
             harmony.PatchAll(typeof(PatchPlayerShip));
-            harmony.PatchAll(typeof(PatchBFSyntaxHunt));
 
             harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }
