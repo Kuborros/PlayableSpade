@@ -22,7 +22,7 @@ namespace PlayableSpade.PlayerPatches
             if (FPSaveManager.character == PlayableSpade.spadeCharID)
             {
                 //Par time one stage
-                if (badgeID == BadgeHandler.GetBadgeDataByUid("kubo.spaderunner").id) 
+                if (badgeID == BadgeHandler.GetBadgeDataByUid("kubo.spaderunner").id)
                 {
                     int stagetime = (FPStage.currentStage.milliSeconds + FPStage.currentStage.seconds * 100) + FPStage.currentStage.minutes * 6000;
                     if (stagetime > 0 && stagetime < FPSaveManager.GetStageParTime(FPStage.currentStage.stageID))

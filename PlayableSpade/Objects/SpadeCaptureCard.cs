@@ -31,17 +31,17 @@ namespace PlayableSpade.Objects
         [HideInInspector]
         public bool ignoreTerrain;
 
-        public FPHitBox hbTouch;
+        public FPHitBox hbTouch = new FPHitBox { enabled = true, left = -10f, top = 10, right = 10, bottom = -10f };
 
-        public float attackPower;
+        public float attackPower = 5f;
 
-        public float speed;
+        public float speed = 15f;
 
-        public float turnSpeed;
+        public float turnSpeed = 15f;
 
         public float trackTimer = 15f;
 
-        private float jinkTimer;
+        private float jinkTimer = 0.5f;
 
         public float jinkPeriod = 0.2f;
 
@@ -49,8 +49,6 @@ namespace PlayableSpade.Objects
 
         [HideInInspector]
         public Vector2 attackKnockback;
-
-        [Header("Sfx Settings")]
 
         private LineRenderer line;
 

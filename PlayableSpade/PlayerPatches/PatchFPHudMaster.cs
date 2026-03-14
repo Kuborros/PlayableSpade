@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using PlayableSpade.PlayerPatches;
 
 namespace PlayableSpade.PlayerPatches
 {
@@ -72,7 +71,7 @@ namespace PlayableSpade.PlayerPatches
                 if (player.input.down || player.input.downPress)
                 {
                     text4 = "Ground Pound";
-                } 
+                }
                 else
                     text4 = "Dodge Dash";
             }

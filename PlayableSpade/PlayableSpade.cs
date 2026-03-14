@@ -1,14 +1,13 @@
 ﻿using BepInEx;
-using BepInEx.Logging;
-using HarmonyLib;
-using System.IO;
-using FP2Lib.Badge;
-using FP2Lib.Vinyl;
-using UnityEngine;
-using FP2Lib.Player;
 using BepInEx.Configuration;
-using PlayableSpade.BossPatches;
+using BepInEx.Logging;
+using FP2Lib.Badge;
+using FP2Lib.Player;
+using FP2Lib.Vinyl;
+using HarmonyLib;
 using PlayableSpade.PlayerPatches;
+using System.IO;
+using UnityEngine;
 
 namespace PlayableSpade
 {
@@ -39,21 +38,21 @@ namespace PlayableSpade
             }
 
             //Set up config options
-             configDashOnDoubleJump = Config.Bind("Gameplay",
-                                    "DoubleJumpDash",
-                                    false,
-                                    "Rebinds the dash from Guard to pressing Jump mid-air.");
+            configDashOnDoubleJump = Config.Bind("Gameplay",
+                                   "DoubleJumpDash",
+                                   false,
+                                   "Rebinds the dash from Guard to pressing Jump mid-air.");
 
             //Initialise music
             AudioClip spadeClear = moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade");
             AudioClip spadeTheme = moddedBundle.LoadAsset<AudioClip>("M_Theme_Spade");
 
             //Add Vinyls
-            VinylHandler.RegisterVinyl("kubo.m_clear_spade","Results - Spade",spadeClear,VAddToShop.Naomi);
-            VinylHandler.RegisterVinyl("kubo.m_theme_spade", "Spade's Theme",spadeTheme, VAddToShop.Fawnstar);
+            VinylHandler.RegisterVinyl("kubo.m_clear_spade", "Results - Spade", spadeClear, VAddToShop.Naomi);
+            VinylHandler.RegisterVinyl("kubo.m_theme_spade", "Spade's Theme", spadeTheme, VAddToShop.Fawnstar);
 
             //Add Badges
-            BadgeHandler.RegisterBadge("kubo.spaderunner","Red Scarf Runner", "Beat any stage's par time as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[0], FPBadgeType.SILVER);
+            BadgeHandler.RegisterBadge("kubo.spaderunner", "Red Scarf Runner", "Beat any stage's par time as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[0], FPBadgeType.SILVER);
             BadgeHandler.RegisterBadge("kubo.spadespeedrunner", "Red Scarf Speedrunner", "Beat any stage as Spade in less than half of the par time.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[1], FPBadgeType.SILVER);
             BadgeHandler.RegisterBadge("kubo.spademaster", "Red Scarf Master", "Beat the par times in all stages as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[2], FPBadgeType.GOLD);
             BadgeHandler.RegisterBadge("kubo.spadecomplete", "The House Always Wins", "Finish the game as Spade.", moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Badges")[3], FPBadgeType.GOLD);

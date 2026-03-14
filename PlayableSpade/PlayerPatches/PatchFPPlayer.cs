@@ -44,7 +44,7 @@ namespace PlayableSpade.PlayerPatches
         private static float captureCardDamage = 4f;
         private static int cardAngle;
 
-        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true }; 
+        private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
 
 
         public static void Action_ResetCardAngle()
@@ -455,7 +455,7 @@ namespace PlayableSpade.PlayerPatches
                         shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
-                    shadowCard.attackPower = cardDamage / 2  * player.GetAttackModifier();
+                    shadowCard.attackPower = cardDamage / 2 * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = player.direction;
@@ -478,7 +478,7 @@ namespace PlayableSpade.PlayerPatches
                         shadowCard.damageElementType = 4;
                         shadowCard.explodeType = FPExplodeType.METALBURST;
                     }
-                } 
+                }
 
                 cardAngle++;
                 Action_PlaySound(sfxThrowCard, 0.3f);
@@ -508,7 +508,7 @@ namespace PlayableSpade.PlayerPatches
                     projectileBasic.velocity.y = Mathf.Sin(0.017453292f * num2) * 20f;
                     projectileBasic.angle = num2;
                 }
-                
+
 
                 projectileBasic.animatorController = dualCardAnimator;
                 projectileBasic.attackPower = crashCardDamage * player.GetAttackModifier();
@@ -572,7 +572,7 @@ namespace PlayableSpade.PlayerPatches
                     }
                 }
                 Action_PlaySound(sfxThrowDualCard, 0.7f);
-                crashTimer = 0;   
+                crashTimer = 0;
             }
             player.Process360Movement();
         }
@@ -674,11 +674,11 @@ namespace PlayableSpade.PlayerPatches
                     dashTime = 40f;
                     Action_Spade_Dash(45f);
                     player.energy -= 25f;
-                } 
+                }
             }
             else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || guardBuffer > 0f && player.input.guardHold))
             {
-                player.Action_Guard(0f,false);
+                player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down) && !PlayableSpade.configDashOnDoubleJump.Value)
                 {

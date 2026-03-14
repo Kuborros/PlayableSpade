@@ -58,14 +58,14 @@ namespace PlayableSpade.BossPatches
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerBossSpade), "State_ThrowCards", MethodType.Normal)]
         static void PatchPlayerBossSpadeCardThrow(PlayerBossSpade __instance)
-        {   
+        {
             if (__instance.faction != "Player")
                 __instance.Action_FacePlayer();
         }
 
         //Recharge his attack budget
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerBossSpade),"LateUpdate", MethodType.Normal)]
+        [HarmonyPatch(typeof(PlayerBossSpade), "LateUpdate", MethodType.Normal)]
         static void PatchBossSpadeLateUpdate(PlayerBossSpade __instance)
         {
             if (__instance.energy < 100f)
