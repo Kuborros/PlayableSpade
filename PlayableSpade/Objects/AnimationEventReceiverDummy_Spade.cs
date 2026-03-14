@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PlayableSpade.Objects
 {
+    //Used in tutorial stages to not break horribly
     internal class AnimationEventReceiverDummy_Spade
     {
         private void Start()

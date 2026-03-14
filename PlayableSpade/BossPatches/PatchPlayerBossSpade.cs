@@ -54,6 +54,7 @@ namespace PlayableSpade.BossPatches
         }
 
         //Needed to make him actually target you, the base code doesnt do it by itself
+        //When in Player's team he is fine firing blindly.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerBossSpade), "State_ThrowCards", MethodType.Normal)]
         static void PatchPlayerBossSpadeCardThrow(PlayerBossSpade __instance)
@@ -62,6 +63,7 @@ namespace PlayableSpade.BossPatches
                 __instance.Action_FacePlayer();
         }
 
+        //Recharge his attack budget
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerBossSpade),"LateUpdate", MethodType.Normal)]
         static void PatchBossSpadeLateUpdate(PlayerBossSpade __instance)

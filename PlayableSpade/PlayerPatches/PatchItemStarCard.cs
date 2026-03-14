@@ -1,7 +1,8 @@
 ﻿using HarmonyLib;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
+
     internal class PatchItemStarCard
     {
         [HarmonyPrefix]

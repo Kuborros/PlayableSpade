@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
+using PlayableSpade.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchFPPlayer
     {
@@ -19,12 +20,10 @@ namespace PlayableSpade
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
-        public static PlayerShadow playerShadow;
         public static bool upDash;
 
         internal static readonly MethodInfo m_AirMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_AirMoves());
         internal static readonly MethodInfo m_FuelPickup = SymbolExtensions.GetMethodInfo(() => Action_Spade_FuelPickup());
-        internal static readonly MethodInfo m_Jump = SymbolExtensions.GetMethodInfo(() => Action_Jump());
         internal static readonly MethodInfo m_GroundMoves = SymbolExtensions.GetMethodInfo(() => Action_Spade_GroundMoves());
 
         protected static float cardTimer;
@@ -126,7 +125,7 @@ namespace PlayableSpade
             float num = captureCardRange * captureCardRange;
             foreach (FPBaseEnemy fpbaseEnemy in FPStage.GetActiveEnemies(false, false))
             {
-                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || (player != null && fpbaseEnemy.faction != player.faction)) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num)
+                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || player != null && fpbaseEnemy.faction != player.faction) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num)
                 {
                     list.Add(fpbaseEnemy);
                 }
@@ -171,7 +170,7 @@ namespace PlayableSpade
                 if (player.onGround)
                 {
                     ApplyGroundForces(player, false);
-                    if (player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f || (player.input.jumpPress || player.input.jumpHold))
+                    if (player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f || player.input.jumpPress || player.input.jumpHold)
                     {
                         player.state = new FPObjectState(player.State_Ground);
                     }
@@ -187,7 +186,7 @@ namespace PlayableSpade
                 {
                     ApplyWaterForces(player);
                 }
-                else ApplyGravityForce();
+                else ApplyGravityForce(player);
             }
         }
 
@@ -338,19 +337,19 @@ namespace PlayableSpade
             if (player.direction == FPDirection.FACING_LEFT) cardAngle += 2;
             for (int i = 0; i < captureCardCount; i++)
             {
-                BFFMicroMissile bffmicroMissile;
+                SpadeCaptureCard captureCard;
                 if (player.direction == FPDirection.FACING_LEFT)
                 {
-                    bffmicroMissile = (BFFMicroMissile)FPStage.CreateStageObject(BFFMicroMissile.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 - Mathf.Sin(0.017453292f * player.angle) * 32f);
+                    captureCard = (SpadeCaptureCard)FPStage.CreateStageObject(SpadeCaptureCard.classID, player.position.x - Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 - Mathf.Sin(0.017453292f * player.angle) * 32f);
                 }
                 else
                 {
-                    bffmicroMissile = (BFFMicroMissile)FPStage.CreateStageObject(BFFMicroMissile.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 + Mathf.Sin(0.017453292f * player.angle) * 32f);
+                    captureCard = (SpadeCaptureCard)FPStage.CreateStageObject(SpadeCaptureCard.classID, player.position.x + Mathf.Cos(0.017453292f * player.angle) * 32f + Mathf.Sin(0.017453292f * player.angle) * 10, player.position.y + Mathf.Cos(0.017453292f * player.angle) * 10 + Mathf.Sin(0.017453292f * player.angle) * 32f);
                 }
-                bffmicroMissile.transform.rotation = Quaternion.Euler(0f, 0f, player.angle + 20f - cardAngle * 10f + ((localScale.x < 0f) ? 180 : 0));
+                captureCard.transform.rotation = Quaternion.Euler(0f, 0f, player.angle + 20f - cardAngle * 10f + (localScale.x < 0f ? 180 : 0));
                 if (list.Count > 0)
                 {
-                    bffmicroMissile.AssignTarget(list[num], GetTargetOffset(list[num]));
+                    captureCard.AssignTarget(list[num], GetTargetOffset(list[num]));
                     num++;
                     if (num >= list.Count)
                     {
@@ -358,15 +357,10 @@ namespace PlayableSpade
                     }
                 }
                 cardAngle++;
-                bffmicroMissile.attackPower = captureCardDamage * player.GetAttackModifier();
-                bffmicroMissile.turnSpeed = 50;
-                if (FPStage.stageNameString == "Nalao Lake")
-                {
-                    bffmicroMissile.gameObject.GetComponent<Animator>().runtimeAnimatorController = captureCardAnimator;
-                    bffmicroMissile.gameObject.GetComponent<LineRenderer>().enabled = false;
-                }
-                bffmicroMissile.ignoreTerrain = true;
-                bffmicroMissile.faction = player.faction;
+                captureCard.attackPower = captureCardDamage * player.GetAttackModifier();
+                captureCard.turnSpeed = 50;
+                captureCard.ignoreTerrain = true;
+                captureCard.faction = player.faction;
             }
 
         }
@@ -437,7 +431,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = (cardDamage * 2) * player.GetAttackModifier();
+                    projectileBasic.attackPower = cardDamage * 2 * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironCardAnimator[UnityEngine.Random.RandomRangeInt(0, 3)];
@@ -461,7 +455,7 @@ namespace PlayableSpade
                         shadowCard.velocity.y = Mathf.Sin(0.017453292f * num2) * 16f;
                     }
                     shadowCard.animatorController = shadowCardAnimator;
-                    shadowCard.attackPower = (cardDamage / 2 ) * player.GetAttackModifier();
+                    shadowCard.attackPower = cardDamage / 2  * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = player.direction;
@@ -532,7 +526,7 @@ namespace PlayableSpade
                 projectileBasic.hbTouch = cardHitbox;
                 if (player.powerupTimer > 0)
                 {
-                    projectileBasic.attackPower = (crashCardDamage * 2) * player.GetAttackModifier();
+                    projectileBasic.attackPower = crashCardDamage * 2 * player.GetAttackModifier();
                     projectileBasic.damageElementType = 4;
                     projectileBasic.explodeType = FPExplodeType.METALBURST;
                     projectileBasic.animatorController = ironDualCardAnimator;
@@ -557,7 +551,7 @@ namespace PlayableSpade
                         shadowCard.angle = num2;
                     }
                     shadowCard.animatorController = shadowDualCardAnimator;
-                    shadowCard.attackPower = (crashCardDamage / 2) * player.GetAttackModifier();
+                    shadowCard.attackPower = crashCardDamage / 2 * player.GetAttackModifier();
                     shadowCard.animator = shadowCard.GetComponent<Animator>();
                     shadowCard.animator.runtimeAnimatorController = shadowCard.animatorController;
                     shadowCard.direction = FPDirection.FACING_RIGHT;
@@ -659,7 +653,7 @@ namespace PlayableSpade
 
         public static void Action_Spade_AirMoves()
         {
-            if ((player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards))) //Base Card Throw
+            if (player.input.attackPress || player.input.attackHold && !(player.state == State_ThrowCards)) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
@@ -682,7 +676,7 @@ namespace PlayableSpade
                     player.energy -= 25f;
                 } 
             }
-            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
+            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || guardBuffer > 0f && player.input.guardHold))
             {
                 player.Action_Guard(0f,false);
                 Action_Spade_ShadowGuard();
@@ -712,7 +706,7 @@ namespace PlayableSpade
         public static void Action_Spade_GroundMoves()
         {
             upDash = true;
-            if ((player.input.attackPress || player.input.attackHold && player.state != State_ThrowCards)) //Base Card Throw
+            if (player.input.attackPress || player.input.attackHold && player.state != State_ThrowCards) //Base Card Throw
             {
                 player.idleTimer = -player.fightStanceTime;
                 player.state = new FPObjectState(State_ThrowCards);
@@ -728,8 +722,8 @@ namespace PlayableSpade
                     player.state = new FPObjectState(State_Spade_CaptureCard);
                 }
             }
-            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || (guardBuffer > 0f && player.input.guardHold)))
-            {                
+            else if ((player.guardTime <= 0f || player.cancellableGuard) && (player.input.guardPress || guardBuffer > 0f && player.input.guardHold))
+            {
                 player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
                 if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
@@ -742,7 +736,8 @@ namespace PlayableSpade
                     Action_Spade_Dash(90f);
                     player.energy -= 25f;
                 }
-                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING)) {
+                else if (!player.IsPowerupActive(FPPowerup.NO_GUARDING))
+                {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
                     guardFlash.parentObject = player;
@@ -752,54 +747,7 @@ namespace PlayableSpade
             }
         }
 
-        private static void ApplyGravityForce()
-        {
-            if (player.hitStun <= 0f)
-            {
-                player.velocity.y = player.velocity.y + player.gravityStrength * FPStage.deltaTime;
-            }
-            if (player.velocity.y < -24f)
-            {
-                player.velocity.y = -24f;
-            }
-            player.quadrant = 0;
-            RotatePlayerUpright();
-        }
-
-        private static void RotatePlayerUpright()
-        {
-            if (player.angle < 180f)
-            {
-                if (player.angle > 0f)
-                {
-                    player.angle -= 6f * FPStage.deltaTime;
-                }
-                if (player.angle < 0f)
-                {
-                    player.angle = 0f;
-                }
-            }
-            else
-            {
-                if (player.angle < 360f)
-                {
-                    player.angle += 6f * FPStage.deltaTime;
-                }
-                if (player.angle > 360f)
-                {
-                    player.angle = 360f;
-                }
-            }
-        }
-        public static void Action_Jump()
-        {
-            player.Action_Jump();
-        }
-
-        public static void AttackStats_Dash()
-        {
-            AttackStats_Blink(player);
-        }
+        public static void AttackStats_Dash() => AttackStats_Blink(player);
 
         private static void Ghost()
         {
@@ -815,37 +763,10 @@ namespace PlayableSpade
             spriteGhost.activationMode = FPActivationMode.ALWAYS_ACTIVE;
         }
 
-        [HarmonyReversePatch]
-        [HarmonyPatch(typeof(FPPlayer), "AttackStats_Blink", MethodType.Normal)]
-        public static void AttackStats_Blink(FPPlayer instance)
-        {
-            // Replaced at runtime with reverse patch
-            throw new NotImplementedException("Method failed to reverse patch!");
-        }
-
-        [HarmonyReversePatch]
-        [HarmonyPatch(typeof(FPPlayer), "ApplyGroundForces", MethodType.Normal)]
-        public static void ApplyGroundForces(FPPlayer instance, bool ignoreDirectionalInput)
-        {
-            // Replaced at runtime with reverse patch
-            throw new NotImplementedException("Method failed to reverse patch!");
-        }
-
-        [HarmonyReversePatch]
-        [HarmonyPatch(typeof(FPPlayer), "ApplyWaterForces", MethodType.Normal)]
-        public static void ApplyWaterForces(FPPlayer instance)
-        {
-            // Replaced at runtime with reverse patch
-            throw new NotImplementedException("Method failed to reverse patch!");
-        }
-
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "Update", MethodType.Normal)]
         static void PatchPlayerUpdate(FPPlayer __instance, float ___speedMultiplier)
         {
-            cardTimer += FPStage.deltaTime;
-            crashTimer += FPStage.deltaTime;
             player = __instance;
             speedMultiplier = ___speedMultiplier;
             if (player.onGround) upDash = true;
@@ -856,6 +777,8 @@ namespace PlayableSpade
         [HarmonyPatch(typeof(FPPlayer), "LateUpdate", MethodType.Normal)]
         static void PatchPlayerLateUpdate(float ___guardBuffer)
         {
+            cardTimer += FPStage.deltaTime;
+            crashTimer += FPStage.deltaTime;
             guardBuffer = ___guardBuffer;
 
             if (shadowTimer > 0f)
@@ -886,34 +809,31 @@ namespace PlayableSpade
             ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
 
             shadowCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
-            shadowCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             dualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
-            dualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             ironDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
-            ironDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             shadowDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
-            shadowDualCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
             captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
-            captureCardAnimator.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             sfxThrowCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
             sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
             GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
 
-            GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard"));
+            GameObject captureCard = PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard");
+            captureCard.AddComponent<SpadeCaptureCard>();
+            captureCard.name = "The One Card";
+            GameObject.Instantiate<GameObject>(captureCard);
 
             player = __instance;
             upDash = true;
 
+            //Might not be needed anymore. Rember to test!
+            /*
             if (FPStage.stageNameString == "Lunar Cannon")
             {
                 player.blueFlashMat = FPStage.player[0].blueFlashMat;
             }
+            */
 
         }
 
@@ -958,5 +878,39 @@ namespace PlayableSpade
         {
             upDash = true;
         }
+
+        //Reverse Patches
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "AttackStats_Blink", MethodType.Normal)]
+        public static void AttackStats_Blink(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyGroundForces", MethodType.Normal)]
+        public static void ApplyGroundForces(FPPlayer instance, bool ignoreDirectionalInput)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyWaterForces", MethodType.Normal)]
+        public static void ApplyWaterForces(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyWaterForces", MethodType.Normal)]
+        public static void ApplyGravityForce(FPPlayer instance)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿using FP2Lib.Badge;
 using HarmonyLib;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchFPResultsMenu
     {

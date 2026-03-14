@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchFPEventSequence
     {

@@ -1,7 +1,7 @@
 ﻿using FP2Lib.Badge;
 using HarmonyLib;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchMenuWorldMap
     {
@@ -11,7 +11,7 @@ namespace PlayableSpade
         {
             if (___cutsceneCheck && ___badgeCheckTimer > 0f && ___badgeCheckTimer < 26f && FPSaveManager.character == PlayableSpade.spadeCharID)
             {
-                if ((___badgeCheckTimer + FPStage.deltaTime) >= 25f)
+                if (___badgeCheckTimer + FPStage.deltaTime >= 25f)
                 {
                     FPSaveManager.BadgeCheck(BadgeHandler.Badges["kubo.spademaster"].id);
                 }

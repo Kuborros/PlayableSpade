@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
+using PlayableSpade.PlayerPatches;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchFPHudMaster
     {
@@ -17,6 +18,13 @@ namespace PlayableSpade
             {
                 return;
             }
+
+            //BFF2000 should be excluded from our edits. So does Baku Chase.
+            if (player.displayMoveAttack == "Spark Shot" || player.displayMoveAttack.Contains("Missiles") || FPStage.stageNameString == "Bakunawa Chase")
+            {
+                return;
+            }
+
             if (player.IsKOd(false))
             {
                 text = "-";

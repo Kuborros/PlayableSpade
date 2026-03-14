@@ -8,6 +8,7 @@ using UnityEngine;
 using FP2Lib.Player;
 using BepInEx.Configuration;
 using PlayableSpade.BossPatches;
+using PlayableSpade.PlayerPatches;
 
 namespace PlayableSpade
 {
@@ -15,8 +16,8 @@ namespace PlayableSpade
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
-        public static AssetBundle moddedBundle;
-        public static AssetBundle tutorialScene;
+        internal static AssetBundle moddedBundle;
+        internal static AssetBundle tutorialScene;
 
         internal static ManualLogSource logSource;
         internal static ConfigEntry<bool> configDashOnDoubleJump;
@@ -118,7 +119,7 @@ namespace PlayableSpade
                 piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
                 itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
                 worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
-                bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7],
+                bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7], //Rember to updat
                 zaoBaseballSprite = moddedBundle.LoadAsset<Sprite>("SpadeZLBall"),
                 livesIconAnim = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock"),
                 worldMapIdle = spadeIdle,
@@ -141,10 +142,7 @@ namespace PlayableSpade
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
 
             harmony.PatchAll(typeof(PatchFPPlayer));
-            harmony.PatchAll(typeof(PatchFPStage));
             harmony.PatchAll(typeof(PatchFPEventSequence));
-            harmony.PatchAll(typeof(PatchBFFMicroMissile));
-            harmony.PatchAll(typeof(PatchPlayerBFF));
             harmony.PatchAll(typeof(PatchGO3DColumn));
             harmony.PatchAll(typeof(PatchLTNodePlayerBridge));
             harmony.PatchAll(typeof(PatchMenuWorldMap));
@@ -154,9 +152,8 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPSaveManager));
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
-            harmony.PatchAll(typeof(PatchPlayerShip));
 
-            harmony.PatchAll(typeof(PatchPlayerBossSpade));
+            //harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }
     }
 }

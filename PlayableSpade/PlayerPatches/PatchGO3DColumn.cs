@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchGO3DColumn
     {

@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace PlayableSpade
+namespace PlayableSpade.PlayerPatches
 {
     internal class PatchFPHubNPC
     {
@@ -17,7 +17,7 @@ namespace PlayableSpade
 
                 NPCDialog spadoodleDialog = ___dialog[1];
                 spadoodleDialog.description = "Spadoodle";
-                spadoodleDialog.lines = [new NPCDialogLine { text = "<j>OBSERVE</j>, my greatest work of art yet!", pose = "Pose2",jumpToLine = -5, options = new NPCDialogOption[0] }];
+                spadoodleDialog.lines = [new NPCDialogLine { text = "<j>OBSERVE</j>, my greatest work of art yet!", pose = "Pose2", jumpToLine = -5, options = new NPCDialogOption[0] }];
                 ___dialog[1] = spadoodleDialog;
             }
         }
