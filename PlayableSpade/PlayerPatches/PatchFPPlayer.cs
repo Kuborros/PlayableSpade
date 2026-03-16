@@ -34,6 +34,7 @@ namespace PlayableSpade.PlayerPatches
         protected static float ghostTimer = 0f;
         protected static float shadowTimer = 0f;
         protected static float dashTime = 0f;
+        protected static float cacheTimer = 0f;
 
         private static float cardDamage = 1.5f;
         private static float crashCardDamage = 2f;
@@ -54,7 +55,7 @@ namespace PlayableSpade.PlayerPatches
 
         private static void UpdateCardTargetedEnemies()
         {
-            List<FPBaseEnemy> enemyListInMissileRange = GetEnemyListInCardRange();
+            List<FPBaseEnemy> enemyListInMissileRange = GetEnemyListInCardRange(cacheTimer <= 50f);
             enemyListInMissileRange.Sort(new Comparison<FPBaseEnemy>(CompareCardTargets));
             int i = 0;
             while (i < enemyListInMissileRange.Count - 1)
@@ -83,30 +84,38 @@ namespace PlayableSpade.PlayerPatches
             }
         }
 
+        //Sorts targets by priority - closer is better
         private static int CompareCardTargets(FPBaseEnemy enemy1, FPBaseEnemy enemy2)
         {
+            //We are comparing the same object to itself, abort
             if (ReferenceEquals(enemy1, enemy2))
             {
                 return 0;
             }
+            //If target 1 is gone, then we deprioritse it by bumping 2 up
             if (enemy1 == null)
             {
                 return 1;
             }
+            //Same for second
             if (enemy2 == null)
             {
                 return -1;
             }
+            //Calculate distance from the player
             float num = Vector2.SqrMagnitude(player.position - enemy1.position);
             float num2 = Vector2.SqrMagnitude(player.position - enemy2.position);
+            // If first target is closer, give it priority
             if (num < num2)
             {
                 return -1;
             }
+            //Same for second
             if (num > num2)
             {
                 return 1;
             }
+            //If targets are identical distance away, prioritise them by stage object order
             if (enemy1.stageListPos < enemy2.stageListPos)
             {
                 return -1;
@@ -115,21 +124,24 @@ namespace PlayableSpade.PlayerPatches
             {
                 return 1;
             }
+            //Still somehow identical, mark them as so
             return 0;
         }
 
 
-        private static List<FPBaseEnemy> GetEnemyListInCardRange()
+        private static List<FPBaseEnemy> GetEnemyListInCardRange(bool cached)
         {
             List<FPBaseEnemy> list = new List<FPBaseEnemy>();
             float num = captureCardRange * captureCardRange;
-            foreach (FPBaseEnemy fpbaseEnemy in FPStage.GetActiveEnemies(false, false))
+            foreach (FPBaseEnemy fpbaseEnemy in FPStage.GetActiveEnemies(cached, true))
             {
-                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || player != null && fpbaseEnemy.faction != player.faction) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num)
+                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || player != null && fpbaseEnemy.faction != player.faction) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num && fpbaseEnemy.GetType() != typeof(TutorialBarrier))
                 {
                     list.Add(fpbaseEnemy);
                 }
             }
+            //Cache refreshed
+            if (!cached) cacheTimer = 0f;
             return list;
         }
 
@@ -148,6 +160,7 @@ namespace PlayableSpade.PlayerPatches
         private static void State_ThrowCards()
         {
             player.genericTimer += FPStage.deltaTime;
+
             if (cardTimer > 10)
             {
                 if (player.onGround && player.velocity == Vector2.zero)
@@ -278,7 +291,7 @@ namespace PlayableSpade.PlayerPatches
                 player.superArmor = false;
                 if (!shockwave && player.onGround)
                 {
-                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, player.position.y - player.halfHeight);
+                    StingerBomb stingerBomb = (StingerBomb)FPStage.CreateStageObject(StingerBomb.classID, player.position.x, (player.position.y - player.halfHeight) - 5);
                     stingerBomb.explodeTimer = 999f;
                     stingerBomb.faction = player.faction;
                     shockwave = true;
@@ -359,6 +372,7 @@ namespace PlayableSpade.PlayerPatches
                 cardAngle++;
                 captureCard.attackPower = captureCardDamage * player.GetAttackModifier();
                 captureCard.turnSpeed = 50;
+                captureCard.owner = player;
                 captureCard.ignoreTerrain = true;
                 captureCard.faction = player.faction;
             }
@@ -779,6 +793,7 @@ namespace PlayableSpade.PlayerPatches
         {
             cardTimer += FPStage.deltaTime;
             crashTimer += FPStage.deltaTime;
+            cacheTimer += FPStage.deltaTime;
             guardBuffer = ___guardBuffer;
 
             if (shadowTimer > 0f)
@@ -905,7 +920,15 @@ namespace PlayableSpade.PlayerPatches
         }
 
         [HarmonyReversePatch]
-        [HarmonyPatch(typeof(FPPlayer), "ApplyWaterForces", MethodType.Normal)]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyAirForces", MethodType.Normal)]
+        public static void ApplyAirForces(FPPlayer instance, bool ignoreDirectionalInput)
+        {
+            // Replaced at runtime with reverse patch
+            throw new NotImplementedException("Method failed to reverse patch!");
+        }
+
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(FPPlayer), "ApplyGravityForce", MethodType.Normal)]
         public static void ApplyGravityForce(FPPlayer instance)
         {
             // Replaced at runtime with reverse patch

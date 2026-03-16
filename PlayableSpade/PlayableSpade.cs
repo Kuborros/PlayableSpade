@@ -118,7 +118,7 @@ namespace PlayableSpade
                 piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
                 itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
                 worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
-                bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7], //Rember to updat
+                //bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7], //Rember to updat
                 zaoBaseballSprite = moddedBundle.LoadAsset<Sprite>("SpadeZLBall"),
                 livesIconAnim = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock"),
                 worldMapIdle = spadeIdle,
@@ -151,6 +151,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPSaveManager));
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
+            harmony.PatchAll(typeof(PatchFPBaseEnemy));
 
             //harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }

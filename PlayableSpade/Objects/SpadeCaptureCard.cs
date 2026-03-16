@@ -47,6 +47,8 @@ namespace PlayableSpade.Objects
 
         public string faction;
 
+        public FPBaseObject owner;
+
         [HideInInspector]
         public Vector2 attackKnockback;
 
@@ -229,15 +231,19 @@ namespace PlayableSpade.Objects
                 tPoints[num] += vector2 * Time.deltaTime * speed * 60f;
             }
 
-            if ((explodeTimer > 150f && explodeTimer < 175f) || (explodeTimer > 120f && explodeTimer < 140f) || (explodeTimer > 90f && explodeTimer < 110f) || (explodeTimer > 60f && explodeTimer < 80f))
+            //Stop effect like Dail's FP1 cards
+            if (explodeTimer % 30 > 10f)
             {
                 speed = 0;
+                turnSpeed = 150f;
             }
             else
             {
                 speed = 20;
+                turnSpeed = 15f;
             }
 
+            //Armored enemies (aka bosses) take reduced damage
             if (target.enemy != null)
             {
                 if (target.enemy.cannotBeFrozen == true)
