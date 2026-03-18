@@ -40,7 +40,7 @@ namespace PlayableSpade
             //Set up config options
             configDashOnDoubleJump = Config.Bind("Gameplay",
                                    "DoubleJumpDash",
-                                   false,
+                                   true,
                                    "Rebinds the dash from Guard to pressing Jump mid-air.");
 
             //Initialise music
@@ -88,6 +88,13 @@ namespace PlayableSpade
             spadeWalk[2] = mapsprites[6];
             spadeWalk[3] = mapsprites[5];
 
+            MenuPhotoPose photoPose = new MenuPhotoPose 
+            {
+                groundSprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("CameraMode"),
+                airSprites = [moddedBundle.LoadAssetWithSubAssets<Sprite>("AirDash")[1]]
+            };
+
+
             //Load the PlayerBoss version of Spade
             GameObject bossSpade = moddedBundle.LoadAsset<GameObject>("Boss Spade");
 
@@ -117,8 +124,8 @@ namespace PlayableSpade
                 piedSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[0],
                 piedHurtSprite = (Sprite)moddedBundle.LoadAssetWithSubAssets("Spade_Pie")[1],
                 itemFuel = moddedBundle.LoadAsset<Sprite>("ItemFuelCards"),
-                worldMapPauseSprite = moddedBundle.LoadAsset<Sprite>("spade_pause"),
-                //bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_KO")[7], //Rember to updat
+                worldMapPauseSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("Idle1")[0],
+                bfImpaleSprite = moddedBundle.LoadAssetWithSubAssets<Sprite>("KOAirAndBack")[0],
                 zaoBaseballSprite = moddedBundle.LoadAsset<Sprite>("SpadeZLBall"),
                 livesIconAnim = moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_Stock"),
                 worldMapIdle = spadeIdle,
@@ -127,7 +134,7 @@ namespace PlayableSpade
                 sagaBlockSyntax = moddedBundle.LoadAsset<RuntimeAnimatorController>("Saga2Spade"),
                 resultsTrack = spadeClear,
                 endingTrack = spadeTheme,
-                menuPhotoPose = new MenuPhotoPose(),
+                menuPhotoPose = photoPose,
                 characterSelectPrefab = spadeWheel,
                 playerBoss = bossSpade.GetComponent<PlayerBossSpade>(),
                 prefab = moddedBundle.LoadAsset<GameObject>("Player Spade"),

@@ -35,14 +35,15 @@ namespace PlayableSpade.PlayerPatches
         protected static float shadowTimer = 0f;
         protected static float dashTime = 0f;
         protected static float cacheTimer = 0f;
+        protected static bool sideDash = false;
 
-        private static float cardDamage = 1.5f;
-        private static float crashCardDamage = 2f;
+        private static readonly float cardDamage = 1.5f;
+        private static readonly float crashCardDamage = 2f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
-        private static int captureCardCount = 3;
-        private static float captureCardRange = 512f;
-        private static float captureCardDamage = 4f;
+        private static readonly int captureCardCount = 3;
+        private static readonly float captureCardRange = 512f;
+        private static readonly float captureCardDamage = 4f;
         private static int cardAngle;
 
         private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
@@ -55,7 +56,7 @@ namespace PlayableSpade.PlayerPatches
 
         private static void UpdateCardTargetedEnemies()
         {
-            List<FPBaseEnemy> enemyListInMissileRange = GetEnemyListInCardRange(cacheTimer <= 50f);
+            List<FPBaseEnemy> enemyListInMissileRange = GetEnemyListInCardRange(cacheTimer <= 30f);
             enemyListInMissileRange.Sort(new Comparison<FPBaseEnemy>(CompareCardTargets));
             int i = 0;
             while (i < enemyListInMissileRange.Count - 1)
@@ -102,9 +103,19 @@ namespace PlayableSpade.PlayerPatches
             {
                 return -1;
             }
+            float num, num2;
             //Calculate distance from the player
-            float num = Vector2.SqrMagnitude(player.position - enemy1.position);
-            float num2 = Vector2.SqrMagnitude(player.position - enemy2.position);
+            //Give slightly better priority to enemies in front of the player
+            if (player.direction == FPDirection.FACING_LEFT)
+            {
+                num = Vector2.SqrMagnitude(new Vector2(player.position.x - 64, player.position.y) - enemy1.position);
+                num2 = Vector2.SqrMagnitude(new Vector2(player.position.x - 64, player.position.y) - enemy2.position);
+            }
+            else
+            {
+                num = Vector2.SqrMagnitude(new Vector2(player.position.x + 64, player.position.y) - enemy1.position);
+                num2 = Vector2.SqrMagnitude(new Vector2(player.position.x + 64, player.position.y) - enemy2.position);
+            }
             // If first target is closer, give it priority
             if (num < num2)
             {
@@ -223,7 +234,8 @@ namespace PlayableSpade.PlayerPatches
                 if (player.energy <= 1f || !player.input.specialHold)
                 {
                     player.genericTimer = 0f;
-                    player.SetPlayerAnimation("Jumping");
+                    if (player.targetWaterSurface == null)
+                        player.SetPlayerAnimation("Jumping");
                     player.state = new FPObjectState(player.State_InAir);
                     return;
                 }
@@ -237,7 +249,10 @@ namespace PlayableSpade.PlayerPatches
 
         private static void State_Spade_AirDash()
         {
-            player.SetPlayerAnimation("AirDash");
+            if (sideDash)
+                player.SetPlayerAnimation("AirDash");
+            else
+                player.SetPlayerAnimation("UpDash");
             player.genericTimer += FPStage.deltaTime;
             player.superArmor = true;
             ghostTimer += FPStage.deltaTime;
@@ -249,7 +264,7 @@ namespace PlayableSpade.PlayerPatches
                 ghostTimer = 0f;
             }
 
-            if (player.genericTimer >= 10f)
+            if (player.genericTimer >= 15f)
             {
                 player.genericTimer = 0f;
                 player.hbAttack.enabled = false;
@@ -260,6 +275,9 @@ namespace PlayableSpade.PlayerPatches
                 }
                 else
                 {
+                    if (player.targetWaterSurface == null) player.SetPlayerAnimation("Jumping_Loop");
+                    else player.SetPlayerAnimation("Swimming");
+
                     player.state = new FPObjectState(player.State_InAir);
                 }
                 return;
@@ -375,8 +393,10 @@ namespace PlayableSpade.PlayerPatches
                 captureCard.owner = player;
                 captureCard.ignoreTerrain = true;
                 captureCard.faction = player.faction;
+                //Fancier visuals section
+                captureCard.GetComponent<Animator>().Play("CaptureCard" + UnityEngine.Random.Range(1, 5));
+                captureCard.GetComponent<Animator>().SetSpeed(UnityEngine.Random.Range(1.8f, 2.2f));
             }
-
         }
 
         private static void Action_SpadeThrowCard()
@@ -625,13 +645,16 @@ namespace PlayableSpade.PlayerPatches
             {
                 player.velocity.y = Mathf.Max(Mathf.Min(player.velocity.y + dashSpeed, 12f), player.velocity.y);
                 upDash = false;
+                sideDash = false;
                 player.genericTimer = 0;
                 ghostTimer = 0;
+                if (player.onGround|| player.onGrindRail) player.Action_SoftJump();
                 player.state = new FPObjectState(State_Spade_AirDash);
             }
             else if ((player.input.down || player.input.downPress) && !(player.onGrindRail || player.onGround))
             {
                 upDash = false;
+                sideDash = false;
                 player.genericTimer = 0;
                 ghostTimer = 0;
                 player.state = new FPObjectState(State_Spade_GroundPound);
@@ -646,6 +669,7 @@ namespace PlayableSpade.PlayerPatches
                 {
                     player.velocity.x = Mathf.Max(Mathf.Min(player.velocity.x + dashSpeed, 18f), player.velocity.x);
                     upDash = false;
+                    sideDash = true;
                     player.genericTimer = 0;
                     ghostTimer = 0;
                     player.state = new FPObjectState(State_Spade_AirDash);
@@ -659,6 +683,7 @@ namespace PlayableSpade.PlayerPatches
             {
                 player.velocity.x = Mathf.Min(Mathf.Max(player.velocity.x - dashSpeed, -18f), player.velocity.x);
                 upDash = false;
+                sideDash = true;
                 player.genericTimer = 0;
                 ghostTimer = 0;
                 player.state = new FPObjectState(State_Spade_AirDash);
@@ -866,7 +891,7 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPatch(typeof(FPPlayer), "State_InAir", MethodType.Normal)]
         static void PatchPlayerInAir()
         {
-            if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f)
+            if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f && player.targetWaterSurface == null)
             {
                 player.SetPlayerAnimation("Jumping");
             }
