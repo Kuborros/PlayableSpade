@@ -1,44 +1,45 @@
-# PlayableSpade
 
-IMPORTANT:
-The mod is not yet complete, and contains:
+<img width="487" height="339" alt="Spade_Key_Art_2" src="https://github.com/user-attachments/assets/58ea38d6-96aa-4c83-82e8-3b15c64535c5" />
 
-    Bugs
-    Missing animations
-    Placeholder assets and sounds
-    Missing features
+After 10 000 years, he is finally here.
+The grandfather of every other character mod out there.
 
-Any instances of wrong animation playing mean that the intended animation is missing and are not a bug.
+This mod adds Spade as a playable character in Freedom Planet 2!
 
-PLEASE backup your saves before messing around with the mod. It should not affect them, but it would be wise to back them up regardless. You can also use the separate profile feature of mod manager.
+Features:
 
-As updates come out, old saves made with beta builds might become incompatible or broken.
+- New and updated character art and sprites!
+- Custom music track!
+- 4 extra badges!
 
-Currently:
+Spade's moveset employs his cards, in a revised spin on his scrapped FP1 gameplay style.
 
-    Spade can finish a Classic Mode playtrough.
-    Attack, air and ground specials are complete.
-    Air dash is working, and has been redesigned to fit FP2 playstyle. FP1 styled dash has been tested and was not as good as it looks.
+His moves include:
 
+- Triple card throw, a basic ranged attack with moderate damage.
+- Capture Cards, borrowed from Dail's armoury these cards home in on nearby enemies before exploding
+- Dual Crash, a barrage of cards to rain down on your enemies.
+- Dash, Spade's signature traversal move. Use it to quickly gain speed and height.
+- Ground Pound, a cousin of above Dash which deals more damage and creates an AOE shockwave on landing.
 
-How to play as Spade:
-
-Make a new Classic* Mode save, on character select Spade.
-The newly created save file will let you play the whole game as Spade.
-
-    Dash is bound to guard button. You can dash once in the air, aiming it with movement buttons.
-    Attack throws set of 3 cards, you can aim them in 6 directions.
-    Ground Special throws 3 Capture Cards stolen from Dail's armoury to home in on the nearest enemies
-    Air Special throws a wave of cards towards the ground propelling you in the opposite direction. It does not limit your horizontal speed, it does lock your vertical height.
+There is a single configuration option available in the config file (and in Configuration Manager) which allows you to switch binding of the dash move.
+By default, the move is bound to Jump while mid-air, and guard while on the ground. This can be switched to be always bound to Guard if desired.
 
 
-*Or Adventure, it will play broken or no cutscenes however. Due to missing a cutscene you cannot progress past Battlesphere.
+Currently this mod only supports Classic Mode. 
+An Adventure Mode update is possible, but not planned as of yet due to the amount of spritework needed.
 
-Install:
-Use FP2 Mod Installer
-Required folders will be automatically generated on first launch if needed.
+Credits:
 
-Manual Install:
+- [Kubo](https://bsky.app/profile/kubo.catbat.rocks)  - Code
+- [Vela Cosmos](https://bsky.app/profile/velacosmos.bsky.social) - Sprites
+- [23Lief](https://bsky.app/profile/23lief.bsky.social) - Sprites
+- [Treylina](https://bsky.app/profile/treylina.bsky.social) - Sprites
+- [Creeperboy90](https://bsky.app/profile/cb90productions.bsky.social) - Sprites
+- [Alestance](https://bsky.app/profile/alestance.bsky.social) - Sprites
+- [Frisktaker](https://gamebanana.com/members/2042435) - Badge Sprites
+- [FireHeadEngine](https://bsky.app/profile/fireheadengine.bsky.social) - Key Art
+- [SleppySpirit](https://gamebanana.com/members/2337685) - Map Sprites
+- [BobTheGUYYYYY](https://bsky.app/profile/bobtheguyyyyy.bsky.social)- Music
 
-    Install BepInEx 5 (Download) - extract the downloaded file into main game directory.
-    Install the mod - extract the zipfile contents into the main game dir - (if asked, agree to merge the BepInEx folders).
+Released on Gamebanana: (soon)
