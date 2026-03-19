@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.6.0")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.6.1")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
@@ -90,7 +90,7 @@ namespace PlayableSpade
 
             MenuPhotoPose photoPose = new MenuPhotoPose 
             {
-                groundSprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("CameraMode"),
+                groundSprites = moddedBundle.LoadAssetWithSubAssets<Sprite>("CameraModeGround"),
                 airSprites = [moddedBundle.LoadAssetWithSubAssets<Sprite>("AirDash")[1]]
             };
 
@@ -108,6 +108,7 @@ namespace PlayableSpade
                 skill2 = "Jump",
                 skill3 = "Card Throw",
                 skill4 = "Dodge Dash",
+                powerupStartDescription = "You start the stage with Steel Deck ready!",
                 airshipSprite = 1,
                 useOwnCutsceneActivators = false,
                 enabledInAventure = false,
@@ -117,6 +118,13 @@ namespace PlayableSpade
                 ItemFuelPickup = PatchFPPlayer.Action_Spade_FuelPickup,
                 eventActivatorCharacter = FPCharacterID.CAROL,
                 Gender = CharacterGender.MALE,
+                element = CharacterElement.FIRE,
+                statDefaultAcceleration = 0.110625f,
+                statDefaultDeceleration = 0.110625f,
+                statDefaultAirAcceleration = 0.22125f,
+                statDefaultJumpStrength = 10.5f,
+                statDefaultJumpRelease = 4.5f,
+                statDefaultTopSpeed = 7.5f,
                 profilePic = moddedBundle.LoadAsset<Sprite>("spade_portrait"),
                 keyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
                 endingKeyArtSprite = moddedBundle.LoadAsset<Sprite>("Spade_KeyArt"),
@@ -135,10 +143,12 @@ namespace PlayableSpade
                 resultsTrack = spadeClear,
                 endingTrack = spadeTheme,
                 menuPhotoPose = photoPose,
+                menuInstructionPrefab = moddedBundle.LoadAsset<GameObject>("MenuInstructionsSpade"),
                 characterSelectPrefab = spadeWheel,
                 playerBoss = bossSpade.GetComponent<PlayerBossSpade>(),
                 prefab = moddedBundle.LoadAsset<GameObject>("Player Spade"),
-                dataBundle = moddedBundle
+                dataBundle = moddedBundle,
+
             };
 
             PlayerHandler.RegisterPlayableCharacterDirect(spadechar);

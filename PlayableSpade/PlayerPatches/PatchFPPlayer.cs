@@ -17,6 +17,8 @@ namespace PlayableSpade.PlayerPatches
         public static RuntimeAnimatorController shadowDualCardAnimator;
         public static RuntimeAnimatorController ironDualCardAnimator;
         public static RuntimeAnimatorController captureCardAnimator;
+        public static Sprite captureCardSprite;
+        public static Material captureCardTrail;
         public static AudioClip sfxThrowCard;
         public static AudioClip sfxThrowDualCard;
         public static FPPlayer player;
@@ -37,8 +39,8 @@ namespace PlayableSpade.PlayerPatches
         protected static float cacheTimer = 0f;
         protected static bool sideDash = false;
 
-        private static readonly float cardDamage = 1.5f;
-        private static readonly float crashCardDamage = 2f;
+        private static readonly float cardDamage = 2f;
+        private static readonly float crashCardDamage = 2.5f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static readonly int captureCardCount = 3;
@@ -174,7 +176,11 @@ namespace PlayableSpade.PlayerPatches
 
             if (cardTimer > 10)
             {
-                if (player.onGround && player.velocity == Vector2.zero)
+                if (player.state == new FPObjectState(player.State_Crouching) || player.currentAnimation == "Crouching" || (player.input.down && player.currentAnimation == "CrouchThrow"))
+                {
+                    player.SetPlayerAnimation("CrouchThrow");
+                }
+                else if (player.onGround && player.velocity == Vector2.zero)
                 {
                     player.SetPlayerAnimation("Throw");
                 }
@@ -332,7 +338,11 @@ namespace PlayableSpade.PlayerPatches
 
         private static void State_Spade_CaptureCard()
         {
-            if (player.velocity == Vector2.zero)
+            if (player.state == new FPObjectState(player.State_Crouching) || player.currentAnimation == "Crouching" || (player.input.down && player.currentAnimation == "CrouchThrow"))
+            {
+                player.SetPlayerAnimation("CrouchThrow");
+            }
+            else if (player.velocity == Vector2.zero)
             {
                 player.SetPlayerAnimation("Throw");
             }
@@ -852,29 +862,52 @@ namespace PlayableSpade.PlayerPatches
             dualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
             ironDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
             shadowDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
-            captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCardFP1");
+            captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("CaptureCard");
+
+            captureCardSprite = PlayableSpade.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_CaptureCards_Spaced")[0];
+            captureCardTrail = PlayableSpade.moddedBundle.LoadAsset<Material>("CardTrail");
 
             sfxThrowCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
             sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
             GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
 
-            GameObject captureCard = PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard");
-            captureCard.AddComponent<SpadeCaptureCard>();
-            captureCard.name = "The One Card";
-            GameObject.Instantiate<GameObject>(captureCard);
+            //The following doesnt work, it makes Unity explode with random C++ errors every time.
+            //GameObject captureCard = PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard");
+            //captureCard.AddComponent<SpadeCaptureCard>();
+            //captureCard.name = "The One Card";
+            //GameObject.Instantiate(captureCard);
+
+            AnimationCurve trail = new AnimationCurve();
+            trail.AddKey(0,4);
+            trail.AddKey(0.2f,4);
+            trail.AddKey(0.5f,4);
+            trail.AddKey(1,0);
+
+            GameObject captureCardUnfucked = new GameObject();
+            captureCardUnfucked.AddComponent<SpriteRenderer>();
+            captureCardUnfucked.GetComponent<SpriteRenderer>().sprite = captureCardSprite;
+            captureCardUnfucked.GetComponent<SpriteRenderer>().sortingOrder = 2;
+            captureCardUnfucked.AddComponent<Animator>();
+            captureCardUnfucked.GetComponent<Animator>().runtimeAnimatorController = captureCardAnimator;
+            captureCardUnfucked.AddComponent<LineRenderer>();
+            captureCardUnfucked.GetComponent<LineRenderer>().material = captureCardTrail;
+            captureCardUnfucked.GetComponent<LineRenderer>().materials = [captureCardTrail];
+            captureCardUnfucked.GetComponent<LineRenderer>().widthCurve = trail;
+            captureCardUnfucked.GetComponent<LineRenderer>().widthMultiplier = 3;
+            captureCardUnfucked.GetComponent<LineRenderer>().useWorldSpace = true;
+            captureCardUnfucked.GetComponent<LineRenderer>().positionCount = 5;
+            captureCardUnfucked.GetComponent<LineRenderer>().numCapVertices = 1;
+            captureCardUnfucked.GetComponent<LineRenderer>().alignment = LineAlignment.View;
+            captureCardUnfucked.GetComponent<LineRenderer>().textureMode = LineTextureMode.Stretch;
+            captureCardUnfucked.GetComponent<LineRenderer>().SetPositions([new Vector3(10,0,1), new Vector3(20, 0, 1), new Vector3(30, 0, 1), new Vector3(40, 0, 1), new Vector3(50, 0, 1)]);
+            captureCardUnfucked.AddComponent<SpadeCaptureCard>();
+            captureCardUnfucked.name = "I *love* Unity Engine";
+            captureCardUnfucked.layer = 8; //FG PLANE A
+            GameObject.Instantiate(captureCardUnfucked);
 
             player = __instance;
             upDash = true;
-
-            //Might not be needed anymore. Rember to test!
-            /*
-            if (FPStage.stageNameString == "Lunar Cannon")
-            {
-                player.blueFlashMat = FPStage.player[0].blueFlashMat;
-            }
-            */
-
         }
 
         [HarmonyPrefix]
