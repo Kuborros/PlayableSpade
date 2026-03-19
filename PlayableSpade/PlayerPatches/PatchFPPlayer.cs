@@ -902,6 +902,7 @@ namespace PlayableSpade.PlayerPatches
             captureCardUnfucked.GetComponent<LineRenderer>().textureMode = LineTextureMode.Stretch;
             captureCardUnfucked.GetComponent<LineRenderer>().SetPositions([new Vector3(10,0,1), new Vector3(20, 0, 1), new Vector3(30, 0, 1), new Vector3(40, 0, 1), new Vector3(50, 0, 1)]);
             captureCardUnfucked.AddComponent<SpadeCaptureCard>();
+            captureCardUnfucked.GetComponent<SpadeCaptureCard>().activationMode = FPActivationMode.NEVER_ACTIVE;
             captureCardUnfucked.name = "I *love* Unity Engine";
             captureCardUnfucked.layer = 8; //FG PLANE A
             GameObject.Instantiate(captureCardUnfucked);

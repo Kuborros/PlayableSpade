@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "0.6.1")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "1.0.0")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
@@ -169,6 +169,7 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPResultsMenu));
             harmony.PatchAll(typeof(PatchFPHudMaster));
             harmony.PatchAll(typeof(PatchFPBaseEnemy));
+            harmony.PatchAll(typeof(PatchMenuCredits));
 
             //harmony.PatchAll(typeof(PatchPlayerBossSpade));
         }
