@@ -12,7 +12,7 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPatch(typeof(FPBaseEnemy),"DamageCheck",MethodType.Normal)]
         static void PatchFPBaseEnemyDamageCheck(ref int __result, ref FPBaseEnemy __instance, ref float ___firstHitAdvantage, ref float ___deathSpinSpeed)
         {
-            if (__result == 0 && FPSaveManager.character == PlayableSpade.spadeCharID)
+            if (__result == 0 && FPSaveManager.character == PlayableSpade.spadeCharID && __instance.invincibility <= 0)
             {
                 FPBaseObject objectRef = null;
                 Vector2 hitBoxCenter = new Vector2(__instance.position.x + (__instance.hbWeakpoint.left + __instance.hbWeakpoint.right) * 0.5f, __instance.position.y + (__instance.hbWeakpoint.bottom + __instance.hbWeakpoint.top) * 0.5f);

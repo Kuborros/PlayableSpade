@@ -39,13 +39,13 @@ namespace PlayableSpade.PlayerPatches
         protected static float cacheTimer = 0f;
         protected static bool sideDash = false;
 
-        private static readonly float cardDamage = 2f;
-        private static readonly float crashCardDamage = 2.5f;
+        private static readonly float cardDamage = 1f;
+        private static readonly float crashCardDamage = 2f;
 
         private static List<FPBaseEnemy> cardTargetedEnemies;
         private static readonly int captureCardCount = 3;
         private static readonly float captureCardRange = 512f;
-        private static readonly float captureCardDamage = 4f;
+        private static readonly float captureCardDamage = 2f;
         private static int cardAngle;
 
         private static readonly FPHitBox cardHitbox = new FPHitBox { left = -16, right = 16, top = 16, bottom = -16, enabled = true };
@@ -174,7 +174,7 @@ namespace PlayableSpade.PlayerPatches
         {
             player.genericTimer += FPStage.deltaTime;
 
-            if (cardTimer > 10)
+            if (cardTimer > 20)
             {
                 if (player.state == new FPObjectState(player.State_Crouching) || player.currentAnimation == "Crouching" || (player.input.down && player.currentAnimation == "CrouchThrow"))
                 {
@@ -464,6 +464,7 @@ namespace PlayableSpade.PlayerPatches
                 projectileBasic.scale = new Vector2(0.8f, 0.8f);
                 projectileBasic.angle = num2;
                 projectileBasic.ignoreTerrain = false;
+                projectileBasic.ignoreInvincibility = false;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.explodeTimer = 50f;
                 projectileBasic.terminalVelocity = 0f;
@@ -507,6 +508,7 @@ namespace PlayableSpade.PlayerPatches
                     shadowCard.scale = new Vector2(0.8f, 0.8f);
                     shadowCard.angle = num2;
                     shadowCard.ignoreTerrain = false;
+                    shadowCard.ignoreInvincibility = false;
                     shadowCard.explodeType = FPExplodeType.WHITEBURST;
                     shadowCard.explodeTimer = 50f;
                     shadowCard.terminalVelocity = 0f;
@@ -562,6 +564,7 @@ namespace PlayableSpade.PlayerPatches
                 projectileBasic.damageElementType = -1;
                 projectileBasic.explodeType = FPExplodeType.WHITEBURST;
                 projectileBasic.sfxExplode = null;
+                projectileBasic.ignoreInvincibility = false;
                 projectileBasic.gravityStrength = 0;
                 projectileBasic.terminalVelocity = 0f;
                 projectileBasic.explodeTimer = 50f;
@@ -603,6 +606,7 @@ namespace PlayableSpade.PlayerPatches
                     shadowCard.explodeType = FPExplodeType.WHITEBURST;
                     shadowCard.sfxExplode = null;
                     shadowCard.gravityStrength = 0;
+                    shadowCard.ignoreInvincibility = false;
                     shadowCard.terminalVelocity = 0f;
                     shadowCard.explodeTimer = 50f;
                     shadowCard.parentObject = player;
@@ -762,11 +766,12 @@ namespace PlayableSpade.PlayerPatches
             }
             else if ((player.input.specialPress || player.input.specialHold) && !(player.input.up || player.input.down) && player.state != State_Spade_CaptureCard)
             {
-                player.idleTimer = -player.fightStanceTime;
-                if (player.energy > 25)
+                if (player.energy > 33f && cardTimer > 20)
                 {
-                    player.energy -= 25f;
+                    player.idleTimer = -player.fightStanceTime;
+                    player.energy -= 33f;
                     player.genericTimer = 0f;
+                    cardTimer = 0f;
                     Action_SpadeThrowCaptureCard();
                     player.state = new FPObjectState(State_Spade_CaptureCard);
                 }
@@ -871,12 +876,6 @@ namespace PlayableSpade.PlayerPatches
             sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
             GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
-
-            //The following doesnt work, it makes Unity explode with random C++ errors every time.
-            //GameObject captureCard = PlayableSpade.moddedBundle.LoadAsset<GameObject>("SpadeCaptureCard");
-            //captureCard.AddComponent<SpadeCaptureCard>();
-            //captureCard.name = "The One Card";
-            //GameObject.Instantiate(captureCard);
 
             AnimationCurve trail = new AnimationCurve();
             trail.AddKey(0,4);
