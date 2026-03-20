@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "1.0.0")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "1.0.1")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
@@ -20,6 +20,7 @@ namespace PlayableSpade
 
         internal static ManualLogSource logSource;
         internal static ConfigEntry<bool> configDashOnDoubleJump;
+        internal static ConfigEntry<bool> configAdventureMode;
 
         internal static FPCharacterID spadeCharID;
 
@@ -42,6 +43,10 @@ namespace PlayableSpade
                                    "DoubleJumpDash",
                                    true,
                                    "Rebinds the dash from Guard to pressing Jump mid-air.");
+            configAdventureMode = Config.Bind("Extras",
+                                   "ForceAdventureModeAvailable",
+                                   false,
+                                   "Lets you create Adventure Mode files. Adventure Mode is *broken* and will softlock at times rquiring manual fixes to the file.\nTHIS IS NOT SUPPORTED. DO NOT REPORT BUGS WITH THIS ON!");
 
             //Initialise music
             AudioClip spadeClear = moddedBundle.LoadAsset<AudioClip>("M_Clear_Spade");
@@ -111,7 +116,7 @@ namespace PlayableSpade
                 powerupStartDescription = "You start the stage with Steel Deck ready!",
                 airshipSprite = 1,
                 useOwnCutsceneActivators = false,
-                enabledInAventure = false,
+                enabledInAventure = configAdventureMode.Value,
                 enabledInClassic = true,
                 AirMoves = PatchFPPlayer.Action_Spade_AirMoves,
                 GroundMoves = PatchFPPlayer.Action_Spade_GroundMoves,

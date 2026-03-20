@@ -8,7 +8,7 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPrefix]
         [HarmonyWrapSafe]
         [HarmonyPatch(typeof(MenuCredits), "Start", MethodType.Normal)]
-        static void PatchMenuCreditsStartPre(ref float ___startY, ref float ___currentY, ref FPBaseObject[] ___cast, ref string[] ___castAnimation)
+        static void PatchMenuCreditsStartPre(ref float ___startY, ref FPBaseObject[] ___cast, ref string[] ___castAnimation)
         {
             if (FPSaveManager.character == PlayableSpade.spadeCharID)
             {
