@@ -42,4 +42,4 @@ Credits:
 - [SleppySpirit](https://gamebanana.com/members/2337685) - Map Sprites
 - [BobTheGUYYYYY](https://bsky.app/profile/bobtheguyyyyy.bsky.social)- Music
 
-Released on Gamebanana: (soon)
+Released on Gamebanana: https://gamebanana.com/mods/662068
