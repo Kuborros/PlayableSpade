@@ -40,5 +40,14 @@ namespace PlayableSpade.PlayerPatches
                 }
             }
         }
+
+        [HarmonyPostfix]
+        [HarmonyWrapSafe]
+        [HarmonyPatch(typeof(MenuCredits), "Start", MethodType.Normal)]
+        static void PatchMenuCreditsStart(ref float ___endY, ref MenuCredits __instance)
+        {
+            __instance.transform.position = new Vector3(__instance.transform.position.x, __instance.transform.position.y - 200f, __instance.transform.position.z);
+            ___endY = __instance.transform.position.y;
+        }
     }
 }

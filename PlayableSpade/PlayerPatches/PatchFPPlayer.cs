@@ -780,7 +780,7 @@ namespace PlayableSpade.PlayerPatches
             {
                 player.Action_Guard(0f, false);
                 Action_Spade_ShadowGuard();
-                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up || player.input.down))
+                if (player.energy > 25 && !autoGuard && dashTime <= 0f && upDash && (player.input.left || player.input.right || player.input.up))
                 {
                     FPAudio.PlaySfx(15);
                     GuardFlash guardFlash = (GuardFlash)FPStage.CreateStageObject(GuardFlash.classID, player.position.x, player.position.y);
