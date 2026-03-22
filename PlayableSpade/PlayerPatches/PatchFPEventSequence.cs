@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlayableSpade.PlayerPatches
 {
@@ -42,6 +43,20 @@ namespace PlayableSpade.PlayerPatches
                             }
                         }
                     }
+                }
+
+                //Kalaw Battlesphere
+                if (SceneManager.GetActiveScene().name == "Battlesphere_Kalaw")
+                {
+                        Transform cutsceneCarol = GameObject.Find("Cutscene_Carol").transform;
+                        if (cutsceneCarol != null)
+                        {
+                            if (cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController.name != "Spade Animator Player")
+                            {
+                                cutsceneCarol.gameObject.GetComponent<Animator>().runtimeAnimatorController = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("Spade Animator Player");
+                                cutsceneCarol.Find("tail").gameObject.SetActive(false);
+                            }
+                        }
                 }
 
                 //Snowfields magic
