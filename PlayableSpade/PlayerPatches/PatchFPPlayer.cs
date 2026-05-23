@@ -148,7 +148,7 @@ namespace PlayableSpade.PlayerPatches
             float num = captureCardRange * captureCardRange;
             foreach (FPBaseEnemy fpbaseEnemy in FPStage.GetActiveEnemies(cached, true))
             {
-                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || player != null && fpbaseEnemy.faction != player.faction) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num && fpbaseEnemy.GetType() != typeof(TutorialBarrier))
+                if (fpbaseEnemy.health > 0f && fpbaseEnemy.CanBeTargeted() && (player == null || player != null && fpbaseEnemy.faction != player.faction) && Vector2.SqrMagnitude(player.position - fpbaseEnemy.position) <= num && fpbaseEnemy.GetType() != typeof(TutorialBarrier) && fpbaseEnemy.GetType() != typeof(AFKeyBlock))
                 {
                     list.Add(fpbaseEnemy);
                 }
