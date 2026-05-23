@@ -5,13 +5,14 @@ using FP2Lib.Badge;
 using FP2Lib.Player;
 using FP2Lib.Vinyl;
 using HarmonyLib;
+using PlayableSpade.BossPatches;
 using PlayableSpade.PlayerPatches;
 using System.IO;
 using UnityEngine;
 
 namespace PlayableSpade
 {
-    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "1.0.1")]
+    [BepInPlugin("com.kuborro.plugins.fp2.playablespade", "PlayableSpade", "1.1.0")]
     [BepInDependency("000.kuborro.libraries.fp2.fp2lib")]
     public class PlayableSpade : BaseUnityPlugin
     {
@@ -176,7 +177,8 @@ namespace PlayableSpade
             harmony.PatchAll(typeof(PatchFPBaseEnemy));
             harmony.PatchAll(typeof(PatchMenuCredits));
 
-            //harmony.PatchAll(typeof(PatchPlayerBossSpade));
+            harmony.PatchAll(typeof(PatchPlayerBossSpade));
+            harmony.PatchAll(typeof(PatchBossLists));
         }
     }
 }
