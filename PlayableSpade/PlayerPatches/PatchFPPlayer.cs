@@ -821,29 +821,35 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPatch(typeof(FPPlayer), "Update", MethodType.Normal)]
         static void PatchPlayerUpdate(FPPlayer __instance, float ___speedMultiplier)
         {
-            player = __instance;
-            speedMultiplier = ___speedMultiplier;
-            if (player.onGround) upDash = true;
-            if (player.guardTime <= 0f) autoGuard = false;
+            if (__instance.characterID == PlayableSpade.spadeCharID)
+            {
+                player = __instance;
+                speedMultiplier = ___speedMultiplier;
+                if (player.onGround) upDash = true;
+                if (player.guardTime <= 0f) autoGuard = false;
+            }
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "LateUpdate", MethodType.Normal)]
-        static void PatchPlayerLateUpdate(float ___guardBuffer)
+        static void PatchPlayerLateUpdate(float ___guardBuffer, FPPlayer __instance)
         {
-            cardTimer += FPStage.deltaTime;
-            crashTimer += FPStage.deltaTime;
-            cacheTimer += FPStage.deltaTime;
-            guardBuffer = ___guardBuffer;
-
-            if (shadowTimer > 0f)
+            if (__instance.characterID == PlayableSpade.spadeCharID)
             {
-                shadowTimer -= FPStage.deltaTime;
-            }
+                cardTimer += FPStage.deltaTime;
+                crashTimer += FPStage.deltaTime;
+                cacheTimer += FPStage.deltaTime;
+                guardBuffer = ___guardBuffer;
 
-            if (dashTime > 0f)
-            {
-                dashTime -= FPStage.deltaTime;
+                if (shadowTimer > 0f)
+                {
+                    shadowTimer -= FPStage.deltaTime;
+                }
+
+                if (dashTime > 0f)
+                {
+                    dashTime -= FPStage.deltaTime;
+                }
             }
         }
 
@@ -852,62 +858,65 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPatch(typeof(FPPlayer), "Start", MethodType.Normal)]
         static void PatchPlayerStart(FPPlayer __instance)
         {
+            if (__instance.characterID == PlayableSpade.spadeCharID)
+            {
 
-            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
-            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
-            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
-            cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
+                cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard0")).ToArray();
+                cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard1")).ToArray();
+                cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard2")).ToArray();
+                cardAnimator = cardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ThrowingCard3")).ToArray();
 
-            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
-            ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
+                ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard1")).ToArray();
+                ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard2")).ToArray();
+                ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard3")).ToArray();
+                ironCardAnimator = ironCardAnimator.AddItem(PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronCard4")).ToArray();
 
-            shadowCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
-            dualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
-            ironDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
-            shadowDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
-            captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("CaptureCard");
+                shadowCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowCard");
+                dualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("PowerCard");
+                ironDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("IronPowerCard");
+                shadowDualCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("ShadowPowerCard");
+                captureCardAnimator = PlayableSpade.moddedBundle.LoadAsset<RuntimeAnimatorController>("CaptureCard");
 
-            captureCardSprite = PlayableSpade.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_CaptureCards_Spaced")[0];
-            captureCardTrail = PlayableSpade.moddedBundle.LoadAsset<Material>("CardTrail");
+                captureCardSprite = PlayableSpade.moddedBundle.LoadAssetWithSubAssets<Sprite>("Spade_CaptureCards_Spaced")[0];
+                captureCardTrail = PlayableSpade.moddedBundle.LoadAsset<Material>("CardTrail");
 
-            sfxThrowCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
-            sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
+                sfxThrowCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("spade_card_toss");
+                sfxThrowDualCard = PlayableSpade.moddedBundle.LoadAsset<AudioClip>("DiscThrow");
 
-            GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
+                GameObject.Instantiate(PlayableSpade.moddedBundle.LoadAsset<GameObject>("DashGhost"));
 
-            AnimationCurve trail = new AnimationCurve();
-            trail.AddKey(0,4);
-            trail.AddKey(0.2f,4);
-            trail.AddKey(0.5f,4);
-            trail.AddKey(1,0);
+                AnimationCurve trail = new AnimationCurve();
+                trail.AddKey(0, 4);
+                trail.AddKey(0.2f, 4);
+                trail.AddKey(0.5f, 4);
+                trail.AddKey(1, 0);
 
-            GameObject captureCardUnfucked = new GameObject();
-            captureCardUnfucked.AddComponent<SpriteRenderer>();
-            captureCardUnfucked.GetComponent<SpriteRenderer>().sprite = captureCardSprite;
-            captureCardUnfucked.GetComponent<SpriteRenderer>().sortingOrder = 2;
-            captureCardUnfucked.AddComponent<Animator>();
-            captureCardUnfucked.GetComponent<Animator>().runtimeAnimatorController = captureCardAnimator;
-            captureCardUnfucked.AddComponent<LineRenderer>();
-            captureCardUnfucked.GetComponent<LineRenderer>().material = captureCardTrail;
-            captureCardUnfucked.GetComponent<LineRenderer>().materials = [captureCardTrail];
-            captureCardUnfucked.GetComponent<LineRenderer>().widthCurve = trail;
-            captureCardUnfucked.GetComponent<LineRenderer>().widthMultiplier = 3;
-            captureCardUnfucked.GetComponent<LineRenderer>().useWorldSpace = true;
-            captureCardUnfucked.GetComponent<LineRenderer>().positionCount = 5;
-            captureCardUnfucked.GetComponent<LineRenderer>().numCapVertices = 1;
-            captureCardUnfucked.GetComponent<LineRenderer>().alignment = LineAlignment.View;
-            captureCardUnfucked.GetComponent<LineRenderer>().textureMode = LineTextureMode.Stretch;
-            captureCardUnfucked.GetComponent<LineRenderer>().SetPositions([new Vector3(10,0,1), new Vector3(20, 0, 1), new Vector3(30, 0, 1), new Vector3(40, 0, 1), new Vector3(50, 0, 1)]);
-            captureCardUnfucked.AddComponent<SpadeCaptureCard>();
-            captureCardUnfucked.GetComponent<SpadeCaptureCard>().activationMode = FPActivationMode.NEVER_ACTIVE;
-            captureCardUnfucked.name = "I *love* Unity Engine";
-            captureCardUnfucked.layer = 8; //FG PLANE A
-            GameObject.Instantiate(captureCardUnfucked);
+                GameObject captureCardUnfucked = new GameObject();
+                captureCardUnfucked.AddComponent<SpriteRenderer>();
+                captureCardUnfucked.GetComponent<SpriteRenderer>().sprite = captureCardSprite;
+                captureCardUnfucked.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                captureCardUnfucked.AddComponent<Animator>();
+                captureCardUnfucked.GetComponent<Animator>().runtimeAnimatorController = captureCardAnimator;
+                captureCardUnfucked.AddComponent<LineRenderer>();
+                captureCardUnfucked.GetComponent<LineRenderer>().material = captureCardTrail;
+                captureCardUnfucked.GetComponent<LineRenderer>().materials = [captureCardTrail];
+                captureCardUnfucked.GetComponent<LineRenderer>().widthCurve = trail;
+                captureCardUnfucked.GetComponent<LineRenderer>().widthMultiplier = 3;
+                captureCardUnfucked.GetComponent<LineRenderer>().useWorldSpace = true;
+                captureCardUnfucked.GetComponent<LineRenderer>().positionCount = 5;
+                captureCardUnfucked.GetComponent<LineRenderer>().numCapVertices = 1;
+                captureCardUnfucked.GetComponent<LineRenderer>().alignment = LineAlignment.View;
+                captureCardUnfucked.GetComponent<LineRenderer>().textureMode = LineTextureMode.Stretch;
+                captureCardUnfucked.GetComponent<LineRenderer>().SetPositions([new Vector3(10, 0, 1), new Vector3(20, 0, 1), new Vector3(30, 0, 1), new Vector3(40, 0, 1), new Vector3(50, 0, 1)]);
+                captureCardUnfucked.AddComponent<SpadeCaptureCard>();
+                captureCardUnfucked.GetComponent<SpadeCaptureCard>().activationMode = FPActivationMode.NEVER_ACTIVE;
+                captureCardUnfucked.name = "I *love* Unity Engine";
+                captureCardUnfucked.layer = 8; //FG PLANE A
+                GameObject.Instantiate(captureCardUnfucked);
 
-            player = __instance;
-            upDash = true;
+                player = __instance;
+                upDash = true;
+            }
         }
 
         [HarmonyPrefix]
@@ -922,9 +931,9 @@ namespace PlayableSpade.PlayerPatches
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FPPlayer), "State_InAir", MethodType.Normal)]
-        static void PatchPlayerInAir()
+        static void PatchPlayerInAir(FPPlayer __instance)
         {
-            if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f && player.targetWaterSurface == null)
+            if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f && player.targetWaterSurface == null && __instance.characterID == PlayableSpade.spadeCharID)
             {
                 player.SetPlayerAnimation("Jumping");
             }

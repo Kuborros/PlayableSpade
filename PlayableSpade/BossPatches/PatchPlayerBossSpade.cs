@@ -11,19 +11,14 @@ namespace PlayableSpade.BossPatches
 
         protected static float cardTimer;
         protected static float crashTimer;
+        protected static float wallCheckTimer;
         protected static float dashTime = 0f;
         protected static float ghostTimer = 0f;
-
-        internal static bool FightStarted = false;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerBossSpade), "Start", MethodType.Normal)]
         static void PatchPlayerBossSpadeStart(ref PlayerBossSpade __instance, ref Vector2 ___start)
         {
-            FightStarted = false;
-            //Spade's code lacks this line compared to other PlayerBosses - setting this prevents him from instantly shooting you at the start of the fight
-            __instance.genericTimer = -30f;
-
             //Mirror Match
             if (FPSaveManager.character == PlayableSpade.spadeCharID)
             {
@@ -41,9 +36,7 @@ namespace PlayableSpade.BossPatches
 
             if (FPStage.stageNameString == "Training")
             {
-                __instance.position = new Vector2(486, -336); //Both position and start location have to be corrected here, due to assets being loaded from external bundle
-                ___start = new Vector2(486, -336);
-                __instance.health = 120;
+                ___start = new Vector2(514, -336);
             }
 
             instance = __instance;
@@ -51,17 +44,50 @@ namespace PlayableSpade.BossPatches
         }
 
 
-        //Black magic to fix outdated code in the game's files. Spade lacks a check if FPStage's timeEnabled bool is true, making him attack you before round starts (unlike other PlayerBoss instances)
-        //This fixes it by simulating that functionality
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerBossSpade), "State_Running", MethodType.Normal)]
-        static bool PatchPlayerBossSpadeRun(PlayerBossSpade __instance)
+        [HarmonyPatch(typeof(PlayerBossSpade), "State_Default", MethodType.Normal)]
+        static bool PatchPlayerBossSpadeDefault(PlayerBossSpade __instance)
         {
-            if (!FightStarted)
+            __instance.SetPlayerAnimation("FightStance");
+            __instance.spriteRenderer.sprite = null;
+            if (!__instance.bossActivated && FPStage.timeEnabled && __instance.targetPlayer != null
+                && __instance.targetPlayer.position.x > __instance.position.x - __instance.bossActivation.x && __instance.targetPlayer.position.x < __instance.position.x + __instance.bossActivation.x 
+                && __instance.targetPlayer.position.y > __instance.position.y - __instance.bossActivation.y && __instance.targetPlayer.position.y < __instance.position.y + __instance.bossActivation.y)
             {
-                FightStarted = FPStage.timeEnabled;
+                if (__instance.bgmBoss != null)
+                {
+                    FPAudio.PlayMusic(__instance.bgmBoss);
+                }
+                __instance.Action_PlayVoice(__instance.vaStart[Range(0, __instance.vaStart.Length - 1)]);
+                __instance.isTalking = true;
+                __instance.voiceTimer = 240f;
+                __instance.bossActivated = true;
+                FPBossHud component = __instance.GetComponent<FPBossHud>();
+                if (component != null)
+                {
+                    component.MoveIn();
+                }
+                __instance.genericTimer = -30f;
+                __instance.state = State_Running;
+            }
+            if (!FPStage.ConfirmClassWithPoolTypeID(typeof(FPPlayer), FPPlayer.classID))
+            {
+                __instance.bossActivated = true;
+                FPBossHud component2 = __instance.GetComponent<FPBossHud>();
+                if (component2 != null)
+                {
+                    component2.MoveIn();
+                }
+                __instance.state = State_Running;
             }
 
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerBossSpade), "State_Running", MethodType.Normal)]
+        static void PatchPlayerBossSpadeRun(PlayerBossSpade __instance)
+        {
             if (__instance.targetToPursue == null)
             {
                 //Set a target
@@ -70,7 +96,6 @@ namespace PlayableSpade.BossPatches
                 else
                     __instance.targetToPursue = FPStage.FindNearestEnemy(__instance, __instance.pursuitRange);
             }
-            return FightStarted;
         }
 
         [HarmonyPrefix]
@@ -78,7 +103,10 @@ namespace PlayableSpade.BossPatches
         static bool PatchPlayerBossSpadeCardThrow(PlayerBossSpade __instance, ref int ___nextMotion, ref int ___cardAngle)
         {
             if (__instance.faction != "Player")
+            {
                 __instance.Action_FacePlayer();
+                CheckBoundaries(__instance);
+            }
 
             if (cardTimer > 20)
             {
@@ -86,13 +114,9 @@ namespace PlayableSpade.BossPatches
                 {
                     __instance.SetPlayerAnimation("CrouchThrow");
                 }
-                else if (__instance.onGround && __instance.velocity == Vector2.zero)
-                {
-                    __instance.SetPlayerAnimation("Throw");
-                }
                 else if (__instance.onGround)
                 {
-                    __instance.SetPlayerAnimation("RunningThrow");
+                    __instance.SetPlayerAnimation("Throw");
                 }
                 else if (!__instance.onGround)
                 {
@@ -140,7 +164,7 @@ namespace PlayableSpade.BossPatches
             CheckBoundaries(__instance);
             InteractWithObjects(__instance);
 
-            return true;
+            return false;
         }
 
         [HarmonyPrefix]
@@ -152,11 +176,11 @@ namespace PlayableSpade.BossPatches
             __instance.angle = 0f;
             if (___targetDir == 1)
             {
-                __instance.velocity.x = Mathf.Min(__instance.velocity.x + __instance.acceleration * FPStage.deltaTime, 7f);
+                __instance.velocity.x = Mathf.Min(__instance.velocity.x + __instance.acceleration * FPStage.deltaTime, 10f);
             }
             else
             {
-                __instance.velocity.x = Mathf.Max(__instance.velocity.x - __instance.acceleration * FPStage.deltaTime, -7f);
+                __instance.velocity.x = Mathf.Max(__instance.velocity.x - __instance.acceleration * FPStage.deltaTime, -10f);
             }
             if (__instance.position.x < __instance.start.x + __instance.walkRange.left)
             {
@@ -188,7 +212,7 @@ namespace PlayableSpade.BossPatches
                 crashTimer = 0;
             }
 
-            return true;
+            return false;
         }
 
         private static void State_Spade_GroundPound()
@@ -250,6 +274,95 @@ namespace PlayableSpade.BossPatches
             spriteGhost.activationMode = FPActivationMode.ALWAYS_ACTIVE;
         }
 
+        private static void CheckBoundaries(PlayerBossSpade instance)
+        {
+            if (instance.faction != "Player")
+            {
+                FPPlayer fPPlayer = FPStage.FindNearestPlayer(instance, 640f);
+                if (fPPlayer != null)
+                {
+                    if (instance.invincibility > 0f)
+                    {
+                        if (instance.position.x > fPPlayer.position.x + 10f)
+                        {
+                            instance.direction = FPDirection.FACING_LEFT;
+                        }
+                        else if (instance.position.x < fPPlayer.position.x - 10f)
+                        {
+                            instance.direction = FPDirection.FACING_RIGHT;
+                        }
+                    }
+                    else if (instance.state == new FPObjectState(State_Running))
+                    {
+                        if (instance.position.x > fPPlayer.position.x + instance.pursuitRange)
+                        {
+                            instance.direction = FPDirection.FACING_LEFT;
+                        }
+                        else if (instance.position.x < fPPlayer.position.x - instance.pursuitRange)
+                        {
+                            instance.direction = FPDirection.FACING_RIGHT;
+                        }
+                    }
+                }
+            }
+            else if (instance.targetToPursue != null)
+            {
+                if (instance.invincibility > 0f)
+                {
+                    if (instance.position.x > instance.targetToPursue.position.x + 10f)
+                    {
+                        instance.direction = FPDirection.FACING_LEFT;
+                    }
+                    else if (instance.position.x < instance.targetToPursue.position.x - 10f)
+                    {
+                        instance.direction = FPDirection.FACING_RIGHT;
+                    }
+                }
+                else if (instance.state == new FPObjectState(State_Running))
+                {
+                    if (instance.position.x > instance.targetToPursue.position.x + instance.pursuitRange)
+                    {
+                        instance.direction = FPDirection.FACING_LEFT;
+                    }
+                    else if (instance.position.x < instance.targetToPursue.position.x - instance.pursuitRange)
+                    {
+                        instance.direction = FPDirection.FACING_RIGHT;
+                    }
+                }
+            }
+            if (instance.walkRange.enabled && instance.position.x > instance.start.x + instance.walkRange.right)
+            {
+                instance.direction = FPDirection.FACING_LEFT;
+            }
+            else if (instance.walkRange.enabled && instance.position.x < instance.start.x + instance.walkRange.left)
+            {
+                instance.direction = FPDirection.FACING_RIGHT;
+            }
+            if (instance.colliderWall != null && wallCheckTimer > 20f)
+            {
+                if (instance.onGround)
+                {
+                    instance.groundVel = 0f - instance.groundVel;
+                }
+                else
+                {
+                    instance.velocity.x = 0f - instance.prevVelocity.x;
+                }
+                instance.direction ^= FPDirection.FACING_RIGHT;
+                wallCheckTimer = 0f;
+            }
+            if (instance.direction == FPDirection.FACING_RIGHT)
+            {
+                instance.input.right = true;
+                instance.input.left = false;
+            }
+            else
+            {
+                instance.input.left = true;
+                instance.input.right = false;
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerBossSpade), "LateUpdate", MethodType.Normal)]
         static void PatchBossSpadeLateUpdate(PlayerBossSpade __instance)
@@ -261,21 +374,12 @@ namespace PlayableSpade.BossPatches
 
             cardTimer += FPStage.deltaTime;
             crashTimer += FPStage.deltaTime;
+            wallCheckTimer += FPStage.deltaTime;
 
             if (dashTime > 0f)
             {
                 dashTime -= FPStage.deltaTime;
             }
-        }
-
-
-
-        [HarmonyReversePatch]
-        [HarmonyPatch(typeof(PlayerBossSpade), "CheckBoundaries", MethodType.Normal)]
-        public static void CheckBoundaries(PlayerBossSpade instance)
-        {
-            // Replaced at runtime with reverse patch
-            throw new NotImplementedException("Method failed to reverse patch!");
         }
 
         [HarmonyReversePatch]
