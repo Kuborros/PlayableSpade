@@ -933,9 +933,9 @@ namespace PlayableSpade.PlayerPatches
         [HarmonyPatch(typeof(FPPlayer), "State_InAir", MethodType.Normal)]
         static void PatchPlayerInAir(FPPlayer __instance)
         {
-            if (player.currentAnimation == "AirThrow" && player.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f && player.targetWaterSurface == null && __instance.characterID == PlayableSpade.spadeCharID)
+            if (__instance.currentAnimation == "AirThrow" && __instance.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f && __instance.targetWaterSurface == null && __instance.characterID == PlayableSpade.spadeCharID)
             {
-                player.SetPlayerAnimation("Jumping");
+                __instance.SetPlayerAnimation("Jumping");
             }
         }
 

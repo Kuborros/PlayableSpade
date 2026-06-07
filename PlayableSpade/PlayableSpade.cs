@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using FP2Lib.Badge;
+using FP2Lib.Challenge;
 using FP2Lib.Player;
 using FP2Lib.Vinyl;
 using HarmonyLib;
@@ -24,6 +25,7 @@ namespace PlayableSpade
         internal static ConfigEntry<bool> configAdventureMode;
 
         internal static FPCharacterID spadeCharID;
+        internal static int spadeBossID;
 
         private void Awake()
         {
@@ -158,8 +160,13 @@ namespace PlayableSpade
             };
 
             PlayerHandler.RegisterPlayableCharacterDirect(spadechar);
-
             spadeCharID = (FPCharacterID)PlayerHandler.GetPlayableCharaByUid(spadechar.uid).id;
+
+            ChallengeHandler.RegisterDojoBoss("kubo.spadeboss", "Spade", 200, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
+            spadeBossID = ChallengeHandler.GetChallengeDataByUID("kubo.spadeboss").id;
+
+            //ChallengeHandler.RegisterDojoBoss("kubo.spadeboss2", "Spade but Cooler", 1000, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
+            //ChallengeHandler.RegisterDojoBoss("kubo.spadeboss3", "Coolest Spade", 20000, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
 
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
 
