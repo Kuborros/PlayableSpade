@@ -70,7 +70,6 @@ namespace PlayableSpade.BossPatches
                 __instance.genericTimer = -30f;
                 __instance.state = State_Running;
             }
-            /*
             if (!FPStage.ConfirmClassWithPoolTypeID(typeof(FPPlayer), FPPlayer.classID))
             {
                 __instance.bossActivated = true;
@@ -81,7 +80,6 @@ namespace PlayableSpade.BossPatches
                 }
                 __instance.state = State_Running;
             }
-            */
             return false;
         }
 
@@ -339,7 +337,7 @@ namespace PlayableSpade.BossPatches
             {
                 instance.direction = FPDirection.FACING_RIGHT;
             }
-            if (instance.colliderWall != null && wallCheckTimer > 20f)
+            if (instance.colliderWall != null && wallCheckTimer > 30f)
             {
                 if (instance.onGround)
                 {

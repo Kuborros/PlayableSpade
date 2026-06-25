@@ -165,9 +165,6 @@ namespace PlayableSpade
             ChallengeHandler.RegisterDojoBoss("kubo.spadeboss", "Spade", 200, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
             spadeBossID = ChallengeHandler.GetChallengeDataByUID("kubo.spadeboss").id;
 
-            //ChallengeHandler.RegisterDojoBoss("kubo.spadeboss2", "Spade but Cooler", 1000, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
-            //ChallengeHandler.RegisterDojoBoss("kubo.spadeboss3", "Coolest Spade", 20000, -1, "Royal Palace", spadeCharID, moddedBundle.LoadAsset<Sprite>("Spade_Profile_Boss"));
-
             var harmony = new Harmony("com.kuborro.plugins.fp2.playablespade");
 
             harmony.PatchAll(typeof(PatchFPPlayer));
