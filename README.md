@@ -29,6 +29,8 @@ By default, the move is bound to Jump while mid-air, and guard while on the grou
 Currently this mod only supports Classic Mode. 
 An Adventure Mode update is possible, but not planned as of yet due to the amount of spritework needed.
 
+If you wish to try Adventure Mode regardless (might be bit broken), you can enable it using a config flag. Enabling adventure takes a game restart to take effect.
+
 Credits:
 
 - [Kubo](https://bsky.app/profile/kubo.catbat.rocks)  - Code
